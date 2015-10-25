@@ -4,7 +4,7 @@ from nodeconductor.structure import SupportedServices
 
 
 class SugarCRMConfig(AppConfig):
-    name = 'sugarcrm'
+    name = 'nodeconductor_sugarcrm'
     verbose_name = "NodeConductor SugarCRM"
 
     def ready(self):

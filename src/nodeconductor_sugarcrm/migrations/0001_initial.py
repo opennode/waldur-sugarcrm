@@ -56,7 +56,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
                 ('state', django_fsm.FSMIntegerField(default=5, choices=[(0, 'New'), (5, 'Creation Scheduled'), (6, 'Creating'), (1, 'Sync Scheduled'), (2, 'Syncing'), (3, 'In Sync'), (4, 'Erred')])),
                 ('project', models.ForeignKey(to='structure.Project')),
-                ('service', models.ForeignKey(to='sugarcrm.SugarCRMService')),
+                ('service', models.ForeignKey(to='nodeconductor_sugarcrm.SugarCRMService')),
             ],
             options={
             },
@@ -69,7 +69,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sugarcrmservice',
             name='projects',
-            field=models.ManyToManyField(related_name='sugarcrm_services', through='sugarcrm.SugarCRMServiceProjectLink', to='structure.Project'),
+            field=models.ManyToManyField(related_name='sugarcrm_services', through='nodeconductor_sugarcrm.SugarCRMServiceProjectLink', to='structure.Project'),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -85,7 +85,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='crm',
             name='service_project_link',
-            field=models.ForeignKey(related_name='crms', on_delete=django.db.models.deletion.PROTECT, to='sugarcrm.SugarCRMServiceProjectLink'),
+            field=models.ForeignKey(related_name='crms', on_delete=django.db.models.deletion.PROTECT, to='nodeconductor_sugarcrm.SugarCRMServiceProjectLink'),
             preserve_default=True,
         ),
     ]

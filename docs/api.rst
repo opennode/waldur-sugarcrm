@@ -26,6 +26,7 @@ Next parameters will be used for settings creation if settings is not defined:
  - username - NodeConductor user username (e.g. User);
  - password - NodeConductor user password (e.g. Password);
  - image - CRM OpenStack instance image name (default: "sugarcrm");
+ - security_groups - List of CRMs OpenStack instance security groups names (default: ["http"]);
  - min_ram - minimum amount of ram for CRMs OpenStack instance (default: 2048 MB);
  - min_cores - storage volume size CRMs OpenStack instance. (default: 32768 MB);
  - system_size - storage volume size CRMs OpenStack instance (default: 32768 MB);
@@ -46,11 +47,10 @@ Example of a request:
     {
         "name": "My SugarCRM"
         "customer": "http://example.com/api/customers/2aadad6a4b764661add14dfdda26b373/",
-        "backend_url": "http://example.com/",
+        "backend_url": "http://example.com/api/openstack-service-project-link/13",
         "username": "User",
         "password": "Password",
         "image": "SugarCRM-image",
-        "backend_spl_id": 13,
     }
 
 
