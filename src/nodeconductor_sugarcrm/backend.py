@@ -49,8 +49,8 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
     2. SugarCRM client interacts with SugarCRM API.
     """
 
-    DEFAULT_IMAGE = 'sugarcrm'
-    DEFAULT_SECURITY_GROUPS = ['http']
+    DEFAULT_IMAGE_NAME = 'sugarcrm'
+    DEFAULT_SECURITY_GROUPS_NAMES = ['http']
     DEFAULT_MIN_CORES = 2
     DEFAULT_MIN_RAM = 4 * 1024
     DEFAULT_SYSTEM_SIZE = 32 * 1024
@@ -179,7 +179,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         return response.json()['state']
 
     def _get_crm_security_groups(self):
-        security_groups_names = self.options.get('security_groups', self.DEFAULT_SECURITY_GROUPS)
+        security_groups_names = self.options.get('security_groups_names', self.DEFAULT_SECURITY_GROUPS_NAMES)
         response = self.nc_client.get(reverse('openstack-sgp-list'), params={'service_project_link': self.spl_url})
         if not response.ok:
             raise SugarCRMBackendError('Cannot get security groups from NC backend: response code - %s, '
@@ -192,7 +192,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         return backend_security_groups
 
     def _get_crm_image(self):
-        image_name = self.options.get('image', self.DEFAULT_IMAGE)
+        image_name = self.options.get('image_name', self.DEFAULT_IMAGE_NAME)
         response = self.nc_client.get(reverse('openstack-image-list'), params={'name': image_name})
         if not response.ok:
             raise SugarCRMBackendError('Cannot get image from NC backend: response code - %s, response content: %s' %

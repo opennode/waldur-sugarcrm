@@ -19,14 +19,14 @@ Request parameters:
  - settings - URL of SugarCRM settings, if not defined - new settings will be created from server parameters,
  - dummy - is service dummy,
 
-Next parameters will be used for settings creation if settings is not defined:
+The following rules for generation of the service settings are used:
 
  - backend_url - URL of OpenStack service project link that will be used for sugarCRM resources creation
                  (required, e.g.: http://example.com/api/openstack-service-project-link/1/);
  - username - NodeConductor user username (e.g. User);
  - password - NodeConductor user password (e.g. Password);
- - image - CRM OpenStack instance image name (default: "sugarcrm");
- - security_groups - List of CRMs OpenStack instance security groups names (default: ["http"]);
+ - image_name - CRM OpenStack instance image name (default: "sugarcrm");
+ - security_groups_names - List of CRMs OpenStack instance security groups names (default: ["http"]);
  - min_ram - minimum amount of ram for CRMs OpenStack instance (default: 2048 MB);
  - min_cores - storage volume size CRMs OpenStack instance. (default: 32768 MB);
  - system_size - storage volume size CRMs OpenStack instance (default: 32768 MB);
@@ -57,7 +57,7 @@ Example of a request:
 Link service to a project
 -------------------------
 In order to be able to provision SugarCRM resources, it must first be linked to a project. To do that,
-POST a connection between project and a service to **/api/sugarcrm-service-project-link/** as stuff user or customer
+POST a connection between project and a service to **/api/sugarcrm-service-project-link/** as staff user or customer
 owner.
 For example,
 
@@ -74,7 +74,7 @@ For example,
         "service": "http://example.com/api/sugarcrm/b0e8a4cbd47c4f9ca01642b7ec033db4/"
     }
 
-To remove a link, issue DELETE to url of the corresponding connection as stuff user or customer owner.
+To remove a link, issue DELETE to url of the corresponding connection as staff user or customer owner.
 
 
 Project-service connection list
@@ -84,10 +84,10 @@ To get a list of connections between a project and an oracle service, run GET ag
 where a user has a role.
 
 
-Create new CRM
---------------
+Create a new SugarCRM resource
+------------------------------
 CRM - SugarCRM resource. A new CRM can be created by users with project administrator role, customer owner role or with
-staff privilege (is_staff=True). To create a CRM, client must issue POST request at **/api/sugarcrm-crms/** with
+staff privilege (is_staff=True). To create a CRM, client must issue POST request to **/api/sugarcrm-crms/** with
 parameters:
 
  - name - CRM name;
