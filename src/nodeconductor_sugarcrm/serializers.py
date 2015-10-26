@@ -15,8 +15,8 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
         'password': 'NodeConductor user password (e.g. Password)',
     }
     SERVICE_ACCOUNT_EXTRA_FIELDS = {
-        'image': 'CRMs OpenStack instance image name. (default: "sugarcrm")',
-        'security_groups': 'List of CRMs OpenStack instance security groups names. (default: ["http"])',
+        'image_name': 'CRMs OpenStack instance image name. (default: "sugarcrm")',
+        'security_groups_names': 'List of CRMs OpenStack instance security groups names. (default: ["http"])',
         'min_cores': 'Minimum amount of cores for CRMs OpenStack instance. (default: 2)',
         'min_ram': 'Minimum amount of ram for CRMs OpenStack instance. (default: 2048 MB)',
         'system_size': 'Storage volume size CRMs OpenStack instance. (default: 32768 MB)',
