@@ -53,3 +53,5 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
     class Meta(structure_serializers.BaseResourceSerializer.Meta):
         model = models.CRM
         view_name = 'sugarcrm-crms-detail'
+        fields = structure_serializers.BaseResourceSerializer.Meta.fields + (
+            'api_url', 'admin_username', 'admin_password')
