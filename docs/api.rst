@@ -93,6 +93,9 @@ parameters:
  - name - CRM name;
  - description - CRM description (optional);
  - link to the service-project-link object;
+ - api_url - sugarCRM API URL (temporary, will be populated from CRM instance properties in future);
+ - admin_username - username of auto-created sugarCRM admin;
+ - admin_password - password of auto-created sugarCRM admin;
 
 
  Example of a valid request:
@@ -109,6 +112,9 @@ parameters:
         "name": "test CRM",
         "description": "sample description",
         "service_project_link": "http://example.com/api/sugarcrm-service-project-link/1/",
+        "api_url": "http://example.com",
+        "admin_username": "admin",
+        "admin_password": "admin"
     }
 
 
@@ -141,7 +147,10 @@ Example rendering of the CRM object:
             "project_groups": [],
             "resource_type": "SugarCRM.CRM",
             "state": "Provisioning",
-            "created": "2015-10-20T10:35:19.146Z"
+            "created": "2015-10-20T10:35:19.146Z",
+            "api_url": "http://example.com",
+            "admin_username": "admin",
+            "admin_password": "admin"
         }
     ]
 
