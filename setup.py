@@ -5,6 +5,7 @@ from setuptools import setup, find_packages
 
 install_requires = [
     'nodeconductor>=0.76.0',
+    'sugarcrm>=0.1.1',
 ]
 
 
