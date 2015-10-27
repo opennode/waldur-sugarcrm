@@ -69,6 +69,7 @@ class CRMUserSerializer(serializers.Serializer):
     is_admin = serializers.BooleanField(default=False)
     last_name = serializers.CharField(max_length=30)
     first_name = serializers.CharField(max_length=30, required=False)
+    email = serializers.CharField(source='email1', max_length=255, required=False)
 
     def get_url(self, obj):
         crm = self.context['crm']

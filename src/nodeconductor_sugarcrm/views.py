@@ -38,11 +38,11 @@ class CRMViewSet(structure_views.BaseResourceViewSet):
 
 class CRMUserViewSet(viewsets.ViewSet):
 
-    def dispatch(self, request, crm_uuid, *args, **kwargs):
+    def initial(self, request, crm_uuid, *args, **kwargs):
+        super(CRMUserViewSet, self).initial(request, crm_uuid, *args, **kwargs)
         queryset = filter_queryset_for_user(models.CRM.objects.all(), request.user)
         self.crm = get_object_or_404(queryset, uuid=crm_uuid)
         self.backend = self.crm.get_backend()
-        return super(CRMUserViewSet, self).dispatch(request, crm_uuid, *args, **kwargs)
 
     def get_serializer_context(self):
         return {'crm': self.crm, 'request': self.request}
