@@ -1,8 +1,10 @@
 import logging
+import md5
 import urlparse
 
 import requests
 from rest_framework.reverse import reverse
+import sugarcrm
 
 from nodeconductor.core.tasks import send_task
 from nodeconductor.structure import ServiceBackend, ServiceBackendError
@@ -17,9 +19,9 @@ class SugarCRMBackendError(ServiceBackendError):
 
 class SugarCRMBackend(object):
 
-    def __init__(self, settings):
+    def __init__(self, settings, *args, **kwargs):
         backend_class = SugarCRMDummyBackend if settings.dummy else SugarCRMRealBackend
-        self.backend = backend_class(settings)
+        self.backend = backend_class(settings, *args, **kwargs)
 
     def __getattr__(self, name):
         return getattr(self.backend, name)
@@ -102,10 +104,36 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         def delete(self, url, **kwargs):
             return self._make_request('delete', url, **kwargs)
 
-    def __init__(self, settings):
+    class SugarCRMClient(object):
+
+        def __init__(self, url, username, password):
+            self.url = url + '/service/v4/rest.php'
+            self.session = sugarcrm.Session(self.url, username, password)
+
+        def create_user(self, **kwargs):
+            user = sugarcrm.User()
+            for key, value in kwargs.items():
+                setattr(user, key, value)
+            return self.session.set_entry(user)
+
+        def get_user(self, user_id):
+            return self.session.get_entry('Users', user_id)
+
+        def list_users(self):
+            user_query = sugarcrm.User()
+            return self.session.get_entry_list(user_query)
+
+        def delete_user(self, user):
+            user.deleted = 1
+            self.session.set_entry(user)
+
+    def __init__(self, settings, crm=None):
         self.spl_url = settings.backend_url
         self.options = settings.options or {}
         self.nc_client = self.NodeConductorOpenStackClient(self.spl_url, settings.username, settings.password)
+        if crm is not None:
+            self.crm = crm
+            self.sugar_client = self.SugarCRMClient(crm.api_url, crm.admin_username, crm.admin_password)
 
     def schedule_crm_instance_provision(self, crm):
         min_cores = self.options.get('min_cores', self.DEFAULT_MIN_CORES)
@@ -177,6 +205,40 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
                 'Cannot get state of CRMs instance: response code - %s, response content: %s.'
                 'Request URL: %s' % (response.status_code, response.content, response.request.url))
         return response.json()['state']
+
+    def create_user(self, user_name, password, last_name, **kwargs):
+        encoded_password = md5.new(password).hexdigest()
+        try:
+            user = self.sugar_client.create_user(
+                user_name=user_name, user_hash=encoded_password, last_name=last_name, **kwargs)
+        except requests.exceptions.RequestException as e:
+            raise SugarCRMBackendError(
+                'Cannot create user %s on CRM "%s". Error: %s' % (user_name, self.crm.name, self.sugar_client.url, e))
+
+        logger.info('Successfully created user "%s" for CRM "%s"', user_name, self.crm.name)
+        return user
+
+    def delete_user(self, user):
+        try:
+            self.sugar_client.delete_user(user)
+        except requests.exceptions.RequestException as e:
+            raise SugarCRMBackendError(
+                'Cannot delete user with id %s from CRM "%s". Error: %s' % (user.id, self.crm.name, e))
+
+        logger.info('Successfully deleted user with id %s on CRM "%s"', user.id, self.crm.name)
+
+    def get_user(self, user_id):
+        try:
+            return self.sugar_client.get_user(user_id)
+        except requests.exceptions.RequestException as e:
+            raise SugarCRMBackendError(
+                'Cannot get user with id %s from CRM "%s". Error: %s' % (user_id, self.crm.name, e))
+
+    def list_users(self):
+        try:
+            return self.sugar_client.list_users()
+        except requests.exceptions.RequestException as e:
+            raise SugarCRMBackendError('Cannot get users from CRM "%s". Error: %s' % (self.crm.name, e))
 
     def _get_crm_security_groups(self):
         security_groups_names = self.options.get('security_groups_names', self.DEFAULT_SECURITY_GROUPS_NAMES)
