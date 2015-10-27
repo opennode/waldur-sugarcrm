@@ -179,7 +179,8 @@ Response example:
         "status": "Active",
         "is_admin": true,
         "last_name": "Administrator",
-        "first_name": ""
+        "first_name": "",
+        "email": "admin@example.com"
     }
 ]
 
@@ -196,6 +197,7 @@ Request parameters:
  - last_name - new user last name;
  - first_name - new user first name (can be empty);
  - is_admin - is new user CRM administrator (boolean, default: false);
+ - email - new user email (can be empty);
 
 
 Example of a request:
