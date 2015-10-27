@@ -50,7 +50,7 @@ Example of a request:
         "backend_url": "http://example.com/api/openstack-service-project-link/13",
         "username": "User",
         "password": "Password",
-        "image": "SugarCRM-image",
+        "image": "SugarCRM-image"
     }
 
 
@@ -149,4 +149,66 @@ Example rendering of the CRM object:
 Delete CRM
 ----------
 
-To delete CRM user need to issue DELETE request against **/api/sugarcrm-crms/<crm_uuid>/**.
+To delete CRM - issue DELETE request against **/api/sugarcrm-crms/<crm_uuid>/**.
+
+
+List CRM users
+--------------
+
+To get list of all registered on CRM users - issue GET request against **/api/sugarcrm-crms/<crm_uuid>/users/**.
+Only users with view access to CRM can view CRM users.
+
+Response example:
+
+.. code-block:: javascript
+
+[
+    {
+        "url": "http://example.com/api/sugarcrm-crms/24156c367e3a41eea81e374073fa1060/users/a67a5b55-bb5f-1259-60a2-562e3c88fb34/",
+        "id": "a67a5b55-bb5f-1259-60a2-562e3c88fb34",
+        "user_name": "admin",
+        "status": "Active",
+        "is_admin": true,
+        "last_name": "Administrator",
+        "first_name": ""
+    }
+]
+
+
+Create new CRM user
+-------------------
+
+To create new CRM user - issue POST request against **/api/sugarcrm-crms/<crm_uuid>/users/**.
+
+Request parameters:
+
+ - user_name - new user username;
+ - password - new user password;
+ - last_name - new user last name;
+ - first_name - new user first name (can be empty);
+ - is_admin - is new user CRM administrator (boolean, default: false);
+
+
+Example of a request:
+
+
+.. code-block:: http
+
+    POST /api/sugarcrm/24156c367e3a41eea81e374073fa1060/users/ HTTP/1.1
+    Content-Type: application/json
+    Accept: application/json
+    Authorization: Token c84d653b9ec92c6cbac41c706593e66f567a7fa4
+    Host: example.com
+
+    {
+        "user_name": "test_user
+        "password": "test_user",
+        "last_name": "test user last name",
+        "is_admin": "false"
+    }
+
+
+Delete CRM user
+---------------
+
+To delete CRM user - issue DELETE request against **/api/sugarcrm-crms/<crm_uuid>/users/<user_id>/**.

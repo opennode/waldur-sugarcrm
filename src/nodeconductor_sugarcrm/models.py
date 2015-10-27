@@ -1,6 +1,7 @@
 from django.db import models
 
 from nodeconductor.structure import models as structure_models
+from .backend import SugarCRMBackend
 
 
 class SugarCRMService(structure_models.Service):
@@ -34,3 +35,6 @@ class CRM(structure_models.Resource):
     @classmethod
     def get_url_name(cls):
         return 'sugarcrm-crms'
+
+    def get_backend(self):
+        return SugarCRMBackend(settings=self.service_project_link.service.settings, crm=self)

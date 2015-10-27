@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 
 from nodeconductor.structure import serializers as structure_serializers
 from nodeconductor.structure import SupportedServices
@@ -55,3 +56,20 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
         view_name = 'sugarcrm-crms-detail'
         fields = structure_serializers.BaseResourceSerializer.Meta.fields + (
             'api_url', 'admin_username', 'admin_password')
+
+
+class CRMUserSerializer(serializers.Serializer):
+
+    url = serializers.SerializerMethodField()
+    id = serializers.CharField(read_only=True)
+    user_name = serializers.CharField(max_length=60)
+    password = serializers.CharField(write_only=True, max_length=255)
+    status = serializers.CharField(read_only=True)
+    is_admin = serializers.BooleanField(default=False)
+    last_name = serializers.CharField(max_length=30)
+    first_name = serializers.CharField(max_length=30, required=False)
+
+    def get_url(self, obj):
+        crm = self.context['crm']
+        request = self.context['request']
+        return reverse('sugarcrm-users-detail', kwargs={'crm_uuid': crm.uuid.hex, 'pk': obj.id}, request=request)

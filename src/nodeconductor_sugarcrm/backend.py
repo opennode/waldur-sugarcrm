@@ -19,9 +19,9 @@ class SugarCRMBackendError(ServiceBackendError):
 
 class SugarCRMBackend(object):
 
-    def __init__(self, settings):
+    def __init__(self, settings, *args, **kwargs):
         backend_class = SugarCRMDummyBackend if settings.dummy else SugarCRMRealBackend
-        self.backend = backend_class(settings)
+        self.backend = backend_class(settings, *args, **kwargs)
 
     def __getattr__(self, name):
         return getattr(self.backend, name)
@@ -206,34 +206,33 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
                 'Request URL: %s' % (response.status_code, response.content, response.request.url))
         return response.json()['state']
 
-    def create_user(self, username, password, last_name, **kwargs):
+    def create_user(self, user_name, password, last_name, **kwargs):
         encoded_password = md5.new(password).hexdigest()
         try:
             user = self.sugar_client.create_user(
-                user_name=username, user_hash=encoded_password, last_name=last_name, **kwargs)
+                user_name=user_name, user_hash=encoded_password, last_name=last_name, **kwargs)
         except requests.exceptions.RequestException as e:
             raise SugarCRMBackendError(
-                'Cannot create user %s on CRM "%s". Error: %s' % (username, self.crm.name, self.sugar_client.url, e))
+                'Cannot create user %s on CRM "%s". Error: %s' % (user_name, self.crm.name, self.sugar_client.url, e))
 
-        logger.info('Successfully created user "%s" for CRM "%s"', username, self.crm.name)
+        logger.info('Successfully created user "%s" for CRM "%s"', user_name, self.crm.name)
         return user
 
-    def delete_user(self, user_id):
-        try:
-            user = self.sugar_client.get_user(user_id)
-        except requests.exceptions.RequestException as e:
-            raise SugarCRMBackendError(
-                'Cannot get user with id %s from CRM "%s". Error: %s' % (user_id, self.crm.name, e))
-        if user is None:
-            raise SugarCRMBackendError('User with id %s does not exist on CRM "%s".' % (user_id, self.crm.name))
-
+    def delete_user(self, user):
         try:
             self.sugar_client.delete_user(user)
         except requests.exceptions.RequestException as e:
             raise SugarCRMBackendError(
-                'Cannot get user with id %s from CRM "%s". Error: %s' % (user_id, self.crm.name, e))
+                'Cannot delete user with id %s from CRM "%s". Error: %s' % (user.id, self.crm.name, e))
 
-        logger.info('Successfully deleted user with id %s on CRM "%s"', user_id, self.crm.name)
+        logger.info('Successfully deleted user with id %s on CRM "%s"', user.id, self.crm.name)
+
+    def get_user(self, user_id):
+        try:
+            return self.sugar_client.get_user(user_id)
+        except requests.exceptions.RequestException as e:
+            raise SugarCRMBackendError(
+                'Cannot get user with id %s from CRM "%s". Error: %s' % (user_id, self.crm.name, e))
 
     def list_users(self):
         try:
