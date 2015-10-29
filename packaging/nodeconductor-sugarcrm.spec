@@ -1,4 +1,4 @@
-Name: nodeconductor-saml2
+Name: nodeconductor-sugarcrm
 Summary: SugarCRM plugin for NodeConductor
 Group: Development/Libraries
 Version: 0.1.0
