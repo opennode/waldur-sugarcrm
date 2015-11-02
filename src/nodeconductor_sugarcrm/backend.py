@@ -71,7 +71,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
 
         def authenticate(self):
             url = self._prepare_url(reverse('auth-password'))
-            response = requests.post(url, data=self.credentials)
+            response = requests.post(url, data=self.credentials, verify=False)
             if response.ok:
                 self.token = response.json()['token']
             else:
@@ -87,6 +87,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
             headers = kwargs.get('headers', {})
             headers['Authorization'] = 'Token %s' % self.token
             kwargs['headers'] = headers
+            kwargs['verify'] = kwargs.get('verify', False)
 
             url = self._prepare_url(url)
             response = getattr(requests, method)(url, **kwargs)
@@ -131,9 +132,16 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         self.spl_url = settings.backend_url
         self.options = settings.options or {}
         self.nc_client = self.NodeConductorOpenStackClient(self.spl_url, settings.username, settings.password)
-        if crm is not None:
-            self.crm = crm
-            self.sugar_client = self.SugarCRMClient(crm.api_url, crm.admin_username, crm.admin_password)
+        self.crm = crm
+
+    @property
+    def sugar_client(self):
+        if hasattr(self, '_sugar_client'):
+            return self._sugar_client
+        if self.crm is None:
+            raise SugarCRMBackendError('It is impossible to use sugar client if CRM is not specified for backend.')
+        self._sugar_client = self.SugarCRMClient(self.crm.api_url, self.crm.admin_username, self.crm.admin_password)
+        return self._sugar_client
 
     def schedule_crm_instance_provision(self, crm):
         min_cores = self.options.get('min_cores', self.DEFAULT_MIN_CORES)
