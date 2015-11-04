@@ -29,7 +29,7 @@ setup(
     },
     entry_points={
         'nodeconductor_extensions': (
-            'nodeconductor_sugarcrm = nodeconductor_sugarcrm.urls',
+            'nodeconductor_sugarcrm = nodeconductor_sugarcrm.extension:SugarCRMExtension',
         ),
     },
     # tests_require=tests_requires,
