@@ -203,16 +203,16 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
 
         logger.info('Successfully scheduled instance deletion for CRM "%s"', crm.name)
 
-    def get_crm_instance_state(self, crm):
-        """ Get state of instance that corresponds given CRM """
+    def get_crm_instance_details(self, crm):
+        """ Get details of instance that corresponds given CRM """
         if not crm.backend_id:
-            raise SugarCRMBackendError('Cannot get instance state for CRM without backend id')
+            raise SugarCRMBackendError('Cannot get instance details for CRM without backend id')
         response = self.nc_client.get(reverse('openstack-instance-detail', kwargs={'uuid': crm.backend_id}))
         if not response.ok:
             raise SugarCRMBackendError(
-                'Cannot get state of CRMs instance: response code - %s, response content: %s.'
+                'Cannot get details of CRMs instance: response code - %s, response content: %s.'
                 'Request URL: %s' % (response.status_code, response.content, response.request.url))
-        return response.json()['state']
+        return response.json()
 
     def create_user(self, user_name, password, last_name, **kwargs):
         encoded_password = md5.new(password).hexdigest()

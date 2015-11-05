@@ -64,7 +64,7 @@ def schedule_crm_instance_deletion(crm_uuid, transition_entity=None):
 def wait_for_crm_instance_state(crm_uuid, state, erred_state='Erred'):
     crm = CRM.objects.get(uuid=crm_uuid)
     backend = crm.get_backend()
-    current_state = backend.get_crm_instance_state(crm)
+    current_state = backend.get_crm_instance_details(crm)['state']
     logger.info('Checking state for CRM "%s" (UUID: %s) instance. Current value: %s.',
                 crm.name, crm.uuid.hex, current_state)
     if current_state == 'Erred':
