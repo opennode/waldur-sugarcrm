@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 
 import uuid
 from django.db import models, migrations
-from nodeconductor.cost_tracking import CostConstants
 
 
 def generate_pricelist(apps, schema_editor):
@@ -14,8 +13,8 @@ def generate_pricelist(apps, schema_editor):
     DefaultPriceListItem.objects.create(
         uuid=uuid.uuid4().hex,  # autocreation doesn't work for whatever reason
         resource_content_type=crm_ct,
-        item_type=CostConstants.PriceItem.STORAGE,
-        name='Storage',
+        item_type='storage',
+        name='storage: 1 GB',
         key='1 GB',
         value=1,
     )
@@ -23,9 +22,9 @@ def generate_pricelist(apps, schema_editor):
     DefaultPriceListItem.objects.create(
         uuid=uuid.uuid4().hex,
         resource_content_type=crm_ct,
-        item_type=CostConstants.PriceItem.USAGE,
-        name='Usage',
-        key='',
+        item_type='usage',
+        name='usage: basic',
+        key='basic',
         value=1,
     )
 
