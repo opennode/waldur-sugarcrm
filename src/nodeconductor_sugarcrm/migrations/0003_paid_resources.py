@@ -14,7 +14,7 @@ def generate_pricelist(apps, schema_editor):
         uuid=uuid.uuid4().hex,  # autocreation doesn't work for whatever reason
         resource_content_type=crm_ct,
         item_type='storage',
-        name='storage: 1 GB',
+        name='Storage',
         key='1 GB',
         value=1,
     )
@@ -23,8 +23,8 @@ def generate_pricelist(apps, schema_editor):
         uuid=uuid.uuid4().hex,
         resource_content_type=crm_ct,
         item_type='usage',
-        name='usage: basic',
-        key='basic',
+        name='Usage',
+        key='usage',
         value=1,
     )
 
