@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from nodeconductor.billing.models import PaidResource
@@ -30,7 +31,10 @@ class CRM(PaidResource, structure_models.Resource):
     service_project_link = models.ForeignKey(
         SugarCRMServiceProjectLink, related_name='crms', on_delete=models.PROTECT)
 
-    api_url = models.CharField(max_length=127)
+    size = models.PositiveIntegerField(
+        default=2*1024, help_text='Size of CRMs OpenStack instance data volume in MiB',
+        validators=[MinValueValidator(1024), MaxValueValidator(10*1024)])
+    api_url = models.CharField(max_length=127, help_text='CRMs OpenStack instance URL')
     admin_username = models.CharField(max_length=60)
     admin_password = models.CharField(max_length=255)
 

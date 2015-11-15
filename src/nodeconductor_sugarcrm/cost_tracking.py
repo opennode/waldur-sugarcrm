@@ -33,7 +33,5 @@ class SugarCRMCostTrackingBackend(CostTrackingBackend):
         # usage
         items.append((PriceItemTypes.USAGE, cls.USAGE_KEY, 1))
         # storage
-        backend = resource.get_backend()
-        details = backend.get_crm_instance_details(resource)
-        items.append((PriceItemTypes.STORAGE, cls.STORAGE_KEY, ServiceBackend.mb2gb(details['disk'])))
+        items.append((PriceItemTypes.STORAGE, cls.STORAGE_KEY, ServiceBackend.mb2gb(resource.size)))
         return items

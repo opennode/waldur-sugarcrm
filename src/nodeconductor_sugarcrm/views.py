@@ -48,20 +48,20 @@ class CRMUserViewSet(viewsets.ViewSet):
         return {'crm': self.crm, 'request': self.request}
 
     def list(self, request, crm_uuid):
-        users = self.backend.list_users()
+        users = [user for user in self.backend.list_users() if not int(user.is_admin)]
         serializer = serializers.CRMUserSerializer(users, many=True, context=self.get_serializer_context())
         return Response(serializer.data)
 
     def retrieve(self, request, crm_uuid, pk=None):
         user = self.backend.get_user(pk)
-        if user is None:
+        if user is None or int(user.is_admin):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = serializers.CRMUserSerializer(user, context=self.get_serializer_context())
         return Response(serializer.data)
 
     def destroy(self, request, crm_uuid, pk=None):
         user = self.backend.get_user(pk)
-        if user is None:
+        if user is None or int(user.is_admin):
             return Response(status=status.HTTP_404_NOT_FOUND)
         self.backend.delete_user(user)
         return Response(status=status.HTTP_204_NO_CONTENT)
