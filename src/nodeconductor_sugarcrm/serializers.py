@@ -21,7 +21,6 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
         'min_cores': 'Minimum amount of cores for CRMs OpenStack instance. (default: 2)',
         'min_ram': 'Minimum amount of ram for CRMs OpenStack instance. (default: 2048 MB)',
         'system_size': 'Storage volume size CRMs OpenStack instance. (default: 32768 MB)',
-        'data_size': 'Data volume size of CRMs OpenStack instance. (default: 65536 MB)',
         'user_data': 'User data that will be passed to CRMs OpenStack instance on creation.'
                      'Word {password} will be replaced with auto-generated admin password. '
                      ' (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}])"',
