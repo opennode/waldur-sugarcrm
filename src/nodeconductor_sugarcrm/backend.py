@@ -7,6 +7,7 @@ from rest_framework.reverse import reverse
 import sugarcrm
 
 from nodeconductor.core.tasks import send_task
+from nodeconductor.core.utils import pwgen
 from nodeconductor.structure import ServiceBackend, ServiceBackendError
 
 
@@ -56,7 +57,11 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
     DEFAULT_MIN_CORES = 2
     DEFAULT_MIN_RAM = 4 * 1024
     DEFAULT_SYSTEM_SIZE = 32 * 1024
-    DEFAULT_DATA_SIZE = 64 * 1024
+    DEFAULT_USER_DATA = ("#cloud-config:\n"
+                         "runcmd:\n"
+                         "  - [ bootstrap, -p, {adminpass}]")
+    DEFAULT_PROTOCOL = 'http'
+    CRM_ADMIN_NAME = 'admin'
 
     class NodeConductorOpenStackClient(object):
 
@@ -147,7 +152,10 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         min_cores = self.options.get('min_cores', self.DEFAULT_MIN_CORES)
         min_ram = self.options.get('min_ram', self.DEFAULT_MIN_RAM)
         system_size = self.options.get('system_size', self.DEFAULT_SYSTEM_SIZE)
-        data_size = self.options.get('data_size', self.DEFAULT_DATA_SIZE)
+        user_data = self.options.get('user_data', self.DEFAULT_USER_DATA)
+        admin_username = self.CRM_ADMIN_NAME
+        admin_password = pwgen()
+        user_data = user_data.format(password=admin_password)
 
         image = self._get_crm_image()
         if image['min_disk'] > system_size:
@@ -163,17 +171,20 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
             'image': image['url'],
             'flavor': flavor['url'],
             'system_volume_size': system_size,
-            'data_volume_size': data_size,
-            'security_groups': [sg['url'] for sg in security_groups],
+            'data_volume_size': crm.size,
+            'security_groups': [{'url': sg['url']} for sg in security_groups],
+            'user_data': user_data,
         }
 
-        response = self.nc_client.post(reverse('openstack-instance-list'), data=crm_instance_data)
+        response = self.nc_client.post(reverse('openstack-instance-list'), json=crm_instance_data)
         if not response.ok:
             raise SugarCRMBackendError(
-                'Cannot provision openstack instance for CRM "%s": response code - %s, response content: %s.'
+                'Cannot provision OpenStack instance for CRM "%s": response code - %s, response content: %s.'
                 'Request URL: %s, request body: %s' %
-                (response.status_code, response.content, response.request.url, response.request.body))
+                (crm.name, response.status_code, response.content, response.request.url, response.request.body))
 
+        crm.admin_password = admin_password
+        crm.admin_username = admin_username
         crm.backend_id = response.json()['uuid']
         crm.save()
 
@@ -185,7 +196,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         response = self.nc_client.post(reverse('openstack-instance-stop', kwargs={'uuid': crm.backend_id}))
         if not response.ok:
             raise SugarCRMBackendError(
-                'Cannot stop openstack instance for CRM "%s": response code - %s, response content: %s.'
+                'Cannot stop OpenStack instance for CRM "%s": response code - %s, response content: %s.'
                 'Request URL: %s, request body: %s' %
                 (crm.name, response.status_code, response.content, response.request.url, response.request.body))
 
@@ -197,7 +208,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         response = self.nc_client.delete(reverse('openstack-instance-detail', kwargs={'uuid': crm.backend_id}))
         if not response.ok:
             raise SugarCRMBackendError(
-                'Cannot delete openstack instance for CRM "%s": response code - %s, response content: %s.'
+                'Cannot delete OpenStack instance for CRM "%s": response code - %s, response content: %s.'
                 'Request URL: %s, request body: %s' %
                 (crm.name, response.status_code, response.content, response.request.url, response.request.body))
 
@@ -219,7 +230,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         try:
             user = self.sugar_client.create_user(
                 user_name=user_name, user_hash=encoded_password, last_name=last_name, **kwargs)
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError(
                 'Cannot create user %s on CRM "%s". Error: %s' % (user_name, self.crm.name, self.sugar_client.url, e))
 
@@ -229,7 +240,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
     def delete_user(self, user):
         try:
             self.sugar_client.delete_user(user)
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError(
                 'Cannot delete user with id %s from CRM "%s". Error: %s' % (user.id, self.crm.name, e))
 
@@ -238,22 +249,23 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
     def get_user(self, user_id):
         try:
             return self.sugar_client.get_user(user_id)
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError(
                 'Cannot get user with id %s from CRM "%s". Error: %s' % (user_id, self.crm.name, e))
 
     def list_users(self):
         try:
             return self.sugar_client.list_users()
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError('Cannot get users from CRM "%s". Error: %s' % (self.crm.name, e))
 
     def _get_crm_security_groups(self):
         security_groups_names = self.options.get('security_groups_names', self.DEFAULT_SECURITY_GROUPS_NAMES)
         response = self.nc_client.get(reverse('openstack-sgp-list'), params={'service_project_link': self.spl_url})
         if not response.ok:
-            raise SugarCRMBackendError('Cannot get security groups from NC backend: response code - %s, '
-                                       'response content: %s' % (response.status_code, response.content))
+            raise SugarCRMBackendError(
+                'Cannot get security groups from NC backend: request URL: %s,  response code - %s, '
+                'response content: %s' % (response.request.url, response.status_code, response.content))
         backend_security_groups = [sg for sg in response.json() if sg['name'] in security_groups_names]
         backend_security_groups_names = [sg['name'] for sg in backend_security_groups]
         absent_groups = set(security_groups_names) - set(backend_security_groups_names)

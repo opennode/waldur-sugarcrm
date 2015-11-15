@@ -172,12 +172,11 @@ Response example:
     {
         "url": "http://example.com/api/sugarcrm-crms/24156c367e3a41eea81e374073fa1060/users/a67a5b55-bb5f-1259-60a2-562e3c88fb34/",
         "id": "a67a5b55-bb5f-1259-60a2-562e3c88fb34",
-        "user_name": "admin",
+        "user_name": "user",
         "status": "Active",
-        "is_admin": true,
-        "last_name": "Administrator",
+        "last_name": "User",
         "first_name": "",
-        "email": "admin@example.com"
+        "email": "user@example.com"
     }
 ]
 
@@ -193,7 +192,6 @@ Request parameters:
  - password - new user password;
  - last_name - new user last name;
  - first_name - new user first name (can be empty);
- - is_admin - is new user CRM administrator (boolean, default: false);
  - email - new user email (can be empty);
 
 
@@ -209,10 +207,9 @@ Example of a request:
     Host: example.com
 
     {
-        "user_name": "test_user
+        "user_name": "test_user",
         "password": "test_user",
-        "last_name": "test user last name",
-        "is_admin": "false"
+        "last_name": "test user last name"
     }
 
 

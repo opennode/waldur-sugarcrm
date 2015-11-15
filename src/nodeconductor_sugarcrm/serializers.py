@@ -21,7 +21,10 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
         'min_cores': 'Minimum amount of cores for CRMs OpenStack instance. (default: 2)',
         'min_ram': 'Minimum amount of ram for CRMs OpenStack instance. (default: 2048 MB)',
         'system_size': 'Storage volume size CRMs OpenStack instance. (default: 32768 MB)',
-        'data_size': 'Data volume size of CRMs OpenStack instance. (default: 65536 MB)',
+        'user_data': 'User data that will be passed to CRMs OpenStack instance on creation.'
+                     'Word {password} will be replaced with auto-generated admin password. '
+                     ' (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}])"',
+        'protocol': 'CRMs access protocol. (default: "http")',
     }
 
     class Meta(structure_serializers.BaseServiceSerializer.Meta):
@@ -54,9 +57,8 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
     class Meta(structure_serializers.BaseResourceSerializer.Meta):
         model = models.CRM
         view_name = 'sugarcrm-crms-detail'
-        fields = structure_serializers.BaseResourceSerializer.Meta.fields + (
-            'api_url', 'admin_username', 'admin_password')
-        write_only_fields = ('admin_password',)
+        fields = structure_serializers.BaseResourceSerializer.Meta.fields + ('size', 'api_url',)
+        read_only_fields = ('api_url', )
 
 
 class CRMUserSerializer(serializers.Serializer):
@@ -66,7 +68,6 @@ class CRMUserSerializer(serializers.Serializer):
     user_name = serializers.CharField(max_length=60)
     password = serializers.CharField(write_only=True, max_length=255)
     status = serializers.CharField(read_only=True)
-    is_admin = serializers.BooleanField(default=False)
     last_name = serializers.CharField(max_length=30)
     first_name = serializers.CharField(max_length=30, required=False)
     email = serializers.CharField(source='email1', max_length=255, required=False)
