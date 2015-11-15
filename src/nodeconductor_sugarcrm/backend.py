@@ -60,6 +60,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
     DEFAULT_USER_DATA = ("#cloud-config:\n"
                          "runcmd:\n"
                          "  - [ bootstrap, -p, {adminpass}]")
+    DEFAULT_PROTOCOL = 'http'
     CRM_ADMIN_NAME = 'admin'
 
     class NodeConductorOpenStackClient(object):
@@ -229,7 +230,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         try:
             user = self.sugar_client.create_user(
                 user_name=user_name, user_hash=encoded_password, last_name=last_name, **kwargs)
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError(
                 'Cannot create user %s on CRM "%s". Error: %s' % (user_name, self.crm.name, self.sugar_client.url, e))
 
@@ -239,7 +240,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
     def delete_user(self, user):
         try:
             self.sugar_client.delete_user(user)
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError(
                 'Cannot delete user with id %s from CRM "%s". Error: %s' % (user.id, self.crm.name, e))
 
@@ -248,14 +249,14 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
     def get_user(self, user_id):
         try:
             return self.sugar_client.get_user(user_id)
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError(
                 'Cannot get user with id %s from CRM "%s". Error: %s' % (user_id, self.crm.name, e))
 
     def list_users(self):
         try:
             return self.sugar_client.list_users()
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError('Cannot get users from CRM "%s". Error: %s' % (self.crm.name, e))
 
     def _get_crm_security_groups(self):

@@ -77,12 +77,15 @@ def wait_for_crm_instance_state(crm_uuid, state, erred_state='Erred'):
 @shared_task
 def init_crm_api_url(crm_uuid):
     crm = CRM.objects.get(uuid=crm_uuid)
+    options = crm.service_project_link.service.settings.options
     backend = crm.get_backend()
     external_ips = backend.get_crm_instance_details(crm)['external_ips']
     if not external_ips:
         raise SugarCRMBackendError(
             'Cannot use OpenStack instance with name "%s" for CRM - it does not have external IP.' % crm.name)
-    crm.api_url = 'http://' + external_ips[0]
+    crm.api_url = '{protocol}://{external_ip}'.format(
+        protocol=options.get('protocol', backend.DEFAULT_PROTOCOL),
+        external_ip=external_ips[0])
     crm.save()
 
 

@@ -24,6 +24,7 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
         'user_data': 'User data that will be passed to CRMs OpenStack instance on creation.'
                      'Word {password} will be replaced with auto-generated admin password. '
                      ' (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}])"',
+        'protocol': 'CRMs access protocol. (default: "http")',
     }
 
     class Meta(structure_serializers.BaseServiceSerializer.Meta):
