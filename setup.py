@@ -39,6 +39,6 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Operating System :: OS Independent',
-        'License :: Other/Proprietary License',
+        'License :: OSI Approved :: Apache Software License',
     ],
 )
