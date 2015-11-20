@@ -2,7 +2,7 @@ import logging
 
 from celery import shared_task, chain
 
-from nodeconductor.core.tasks import transition, retry_if_false
+from nodeconductor.core.tasks import save_error_message, transition, retry_if_false
 from .backend import SugarCRMBackendError
 from .models import CRM
 
@@ -38,6 +38,7 @@ def stop_and_destroy_crm(crm_uuid):
 
 @shared_task
 @transition(CRM, 'begin_provisioning')
+@save_error_message
 def schedule_crm_instance_provision(crm_uuid, transition_entity=None):
     crm = transition_entity
     backend = crm.get_backend()
@@ -46,6 +47,7 @@ def schedule_crm_instance_provision(crm_uuid, transition_entity=None):
 
 @shared_task
 @transition(CRM, 'begin_stopping')
+@save_error_message
 def schedule_crm_instance_stopping(crm_uuid, transition_entity=None):
     crm = transition_entity
     backend = crm.get_backend()
@@ -54,6 +56,7 @@ def schedule_crm_instance_stopping(crm_uuid, transition_entity=None):
 
 @shared_task
 @transition(CRM, 'begin_deleting')
+@save_error_message
 def schedule_crm_instance_deletion(crm_uuid, transition_entity=None):
     crm = transition_entity
     backend = crm.get_backend()
