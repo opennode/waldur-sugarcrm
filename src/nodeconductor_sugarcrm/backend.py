@@ -205,6 +205,8 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
 
     def get_crm_template_group_result_details(self, crm):
         """ Get details of CRMs template group provision result """
+        if not crm.backend_id:
+            raise SugarCRMBackendError('Cannot get instance URL for CRM without backend id')
         template_group_result_url = crm.backend_id
         response = self.nc_client.get(template_group_result_url)
         if not response.ok:
@@ -214,15 +216,8 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         return response.json()
 
     def get_crm_instance_url(self, crm):
-        if not crm.backend_id:
-            raise SugarCRMBackendError('Cannot get instance URL for CRM without backend id')
-        template_group_result_url = crm.backend_id
-        response = self.nc_client.get(template_group_result_url)
-        if not response.ok:
-            raise SugarCRMBackendError(
-                'Cannot get details of CRMs template group result: response code - %s, response content: %s.'
-                'Request URL: %s' % (response.status_code, response.content, response.request.url))
-        return response.json()['provisioned_resources']['OpenStack.Instance']
+        details = self.get_crm_template_group_result_details(crm)
+        return details['provisioned_resources']['OpenStack.Instance']
 
     def create_user(self, user_name, password, last_name, **kwargs):
         encoded_password = md5.new(password).hexdigest()
