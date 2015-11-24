@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def provision_crm(crm_uuid):
     chain(
         schedule_crm_instance_provision.si(crm_uuid),
-        wait_for_crm_instance_state.si(crm_uuid, state='Online'),
+        wait_for_crm_template_group_provision.si(crm_uuid),
         init_crm_api_url.si(crm_uuid),
     ).apply_async(
         link=set_online.si(crm_uuid),
@@ -72,6 +72,20 @@ def wait_for_crm_instance_state(crm_uuid, state, erred_state='Erred'):
         raise SugarCRMBackendError('CRM "%s" (UUID: %s) instance with UUID %s become erred. Check OpenStack app logs '
                                    'for more details.' % (crm.name, crm.uuid.hex, crm.backend_id))
     return current_state == state
+
+
+@shared_task(max_retries=120, default_retry_delay=20)
+@retry_if_false
+def wait_for_crm_template_group_provision(crm_uuid):
+    crm = CRM.objects.get(uuid=crm_uuid)
+    backend = crm.get_backend()
+    details = backend.get_crm_template_group_result_details(crm)
+    logger.info('Checking state of CRM "%s" (UUID: %s) provision result. Current state message: %s.',
+                crm.name, crm.uuid.hex, details['state_message'])
+    if details['is_erred']:
+        raise SugarCRMBackendError('CRM "%s" (UUID: %s) provision failed. result UUID %s, message %s' % (
+                                   crm.name, crm.uuid.hex, details['uuid'], details['error_message']))
+    return details['is_finished']
 
 
 @shared_task
