@@ -18,16 +18,15 @@ Request parameters:
 
 The following rules for generation of the service settings are used:
 
- - backend_url - URL of OpenStack service project link that will be used for sugarCRM resources creation
-                 (required, e.g.: http://example.com/api/openstack-service-project-link/1/);
+ - backend_url - URL of template group that describes OpenStack instance provision with default parameters
+                 (required, e.g.: http://example.com/api/template-groups/16c7675752244f5d9e870a2cb0cfeb02/);
  - username - NodeConductor user username (e.g. User);
  - password - NodeConductor user password (e.g. Password);
- - image_name - CRM OpenStack instance image name (default: "sugarcrm");
- - security_groups_names - List of CRMs OpenStack instance security groups names (default: ["http"]);
- - min_ram - minimum amount of ram for CRMs OpenStack instance (default: 2048 MB);
- - min_cores - storage volume size CRMs OpenStack instance. (default: 32768 MB);
- - system_size - storage volume size CRMs OpenStack instance (default: 32768 MB);
- - data_size - data volume size of CRMs OpenStack instance (default: 65536 MB);
+ - user_data - User data that will be passed to CRMs OpenStack instance on creation.
+               Word {password} will be replaced with auto-generated admin password
+               (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}]");
+ - protocol - CRMs access protocol. (default: "http");
+
 
 
 Example of a request:
@@ -44,10 +43,9 @@ Example of a request:
     {
         "name": "My SugarCRM"
         "customer": "http://example.com/api/customers/2aadad6a4b764661add14dfdda26b373/",
-        "backend_url": "http://example.com/api/openstack-service-project-link/13",
+        "backend_url": "http://example.com/api/template-groups/16c7675752244f5d9e870a2cb0cfeb02/",
         "username": "User",
         "password": "Password",
-        "image": "SugarCRM-image"
     }
 
 
