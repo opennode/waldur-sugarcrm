@@ -154,7 +154,6 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
 
         template_data = [{
             'name': crm.name,
-            'service_project_link': self.template_url,
             'user_data': user_data,
         }]
         # schedule template provisioning
