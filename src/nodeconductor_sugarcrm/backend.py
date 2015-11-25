@@ -8,6 +8,7 @@ import sugarcrm
 
 from nodeconductor.core.tasks import send_task
 from nodeconductor.core.utils import pwgen
+from nodeconductor.quotas.models import Quota
 from nodeconductor.structure import ServiceBackend, ServiceBackendError
 
 
@@ -30,7 +31,8 @@ class SugarCRMBackend(object):
 
 class SugarCRMBaseBackend(ServiceBackend):
 
-    def provision(self, crm):
+    def provision(self, crm, users_count):
+        Quota.objects.create(name='users_count', scope=crm, limit=users_count)
         send_task('sugarcrm', 'provision_crm')(
             crm.uuid.hex,
         )
@@ -228,6 +230,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
             raise SugarCRMBackendError(
                 'Cannot create user %s on CRM "%s". Error: %s' % (user_name, self.crm.name, self.sugar_client.url, e))
 
+        self.crm.add_quota_usage('users_count', 1)
         logger.info('Successfully created user "%s" for CRM "%s"', user_name, self.crm.name)
         return user
 
@@ -252,6 +255,10 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
             return self.sugar_client.list_users()
         except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError('Cannot get users from CRM "%s". Error: %s' % (self.crm.name, e))
+
+    def sync_user_quota(self):
+        """ Sync CRM quotas with backend """
+        self.crm.set_quota_usage('users_count', len(self.list_users()))
 
 
 class SugarCRMDummyBackend(SugarCRMBaseBackend):

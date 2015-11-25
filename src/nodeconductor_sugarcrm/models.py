@@ -1,6 +1,7 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
+from nodeconductor.quotas.models import QuotaModelMixin
 from nodeconductor.structure import models as structure_models
 
 from .backend import SugarCRMBackend
@@ -26,7 +27,7 @@ class SugarCRMServiceProjectLink(structure_models.ServiceProjectLink):
         return 'sugarcrm-spl'
 
 
-class CRM(structure_models.Resource, structure_models.PaidResource):
+class CRM(QuotaModelMixin, structure_models.Resource, structure_models.PaidResource):
     service_project_link = models.ForeignKey(
         SugarCRMServiceProjectLink, related_name='crms', on_delete=models.PROTECT)
 
@@ -36,6 +37,8 @@ class CRM(structure_models.Resource, structure_models.PaidResource):
     api_url = models.CharField(max_length=127, help_text='CRMs OpenStack instance URL')
     admin_username = models.CharField(max_length=60)
     admin_password = models.CharField(max_length=255)
+
+    QUOTAS_NAMES = ['users_count']
 
     @classmethod
     def get_url_name(cls):

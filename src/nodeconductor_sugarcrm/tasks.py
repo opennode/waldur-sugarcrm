@@ -15,7 +15,7 @@ def provision_crm(crm_uuid):
     chain(
         schedule_crm_instance_provision.si(crm_uuid),
         wait_for_crm_template_group_provision.si(crm_uuid),
-        init_crm_api_url.si(crm_uuid),
+        init_crm_details.si(crm_uuid),
     ).apply_async(
         link=set_online.si(crm_uuid),
         link_error=set_erred.si(crm_uuid)
@@ -92,7 +92,8 @@ def wait_for_crm_template_group_provision(crm_uuid):
 
 
 @shared_task
-def init_crm_api_url(crm_uuid):
+def init_crm_details(crm_uuid):
+    """ Init CRM quotas and API URL """
     crm = CRM.objects.get(uuid=crm_uuid)
     options = crm.service_project_link.service.settings.options
     backend = crm.get_backend()
@@ -104,6 +105,7 @@ def init_crm_api_url(crm_uuid):
         protocol=options.get('protocol', backend.DEFAULT_PROTOCOL),
         external_ip=external_ips[0])
     crm.save()
+    backend.sync_user_quota()
 
 
 @shared_task
@@ -133,3 +135,13 @@ def set_erred(crm_uuid, transition_entity=None):
 @shared_task
 def delete(crm_uuid):
     CRM.objects.get(uuid=crm_uuid).delete()
+
+
+# celerybeat tasks:
+
+@shared_task(name='nodeconductor.sugarcrm.sync_crms_quotas')
+def sync_crms_quotas():
+    """ Update quota usage from backend for all CRMs """
+    for crm in CRM.objects.all():
+        backend = crm.get_backend()
+        backend.sync_user_quota()

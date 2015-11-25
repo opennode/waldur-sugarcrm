@@ -24,7 +24,7 @@ class CRMViewSet(structure_views.BaseResourceViewSet):
     def perform_provision(self, serializer):
         resource = serializer.save()
         backend = resource.get_backend()
-        backend.provision(resource)
+        backend.provision(resource, users_count=serializer.validated_data['users_count'])
 
     # User can only create and delete CRMs. He cannot stop them.
     @structure_views.safe_operation(valid_state=models.CRM.States.ONLINE)
