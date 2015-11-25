@@ -7,7 +7,7 @@ dev_requires = [
 ]
 
 install_requires = [
-    'nodeconductor>=0.80.0',
+    'nodeconductor>=0.81.0',
     'sugarcrm>=0.1.1',
 ]
 

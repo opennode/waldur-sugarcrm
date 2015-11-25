@@ -10,20 +10,15 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
 
     SERVICE_TYPE = SupportedServices.Types.SugarCRM
     SERVICE_ACCOUNT_FIELDS = {
-        'backend_url': 'URL of OpenStack service project link that will be used for sugarCRM resources creation '
-                       '(required, e.g.: http://example.com/api/openstack-service-project-link/1/)',
+        'backend_url': 'URL of template group that describes OpenStack instance provision with default parameters'
+                       '(required, e.g.: http://example.com/api/template-groups/16c7675752244f5d9e870a2cb0cfeb02/)',
         'username': 'NodeConductor user username (e.g. Username)',
         'password': 'NodeConductor user password (e.g. Password)',
     }
     SERVICE_ACCOUNT_EXTRA_FIELDS = {
-        'image_name': 'CRMs OpenStack instance image name. (default: "sugarcrm")',
-        'security_groups_names': 'List of CRMs OpenStack instance security groups names. (default: ["http"])',
-        'min_cores': 'Minimum amount of cores for CRMs OpenStack instance. (default: 2)',
-        'min_ram': 'Minimum amount of ram for CRMs OpenStack instance. (default: 2048 MB)',
-        'system_size': 'Storage volume size CRMs OpenStack instance. (default: 32768 MB)',
         'user_data': 'User data that will be passed to CRMs OpenStack instance on creation.'
                      'Word {password} will be replaced with auto-generated admin password. '
-                     ' (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}])"',
+                     ' (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}]")',
         'protocol': 'CRMs access protocol. (default: "http")',
     }
 
