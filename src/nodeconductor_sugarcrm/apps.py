@@ -7,11 +7,10 @@ from nodeconductor.structure import SupportedServices
 class SugarCRMConfig(AppConfig):
     name = 'nodeconductor_sugarcrm'
     verbose_name = "NodeConductor SugarCRM"
+    service_name = 'SugarCRM'
 
     def ready(self):
-        SugarCRMService = self.get_model('SugarCRMService')
-
         from .backend import SugarCRMBackend
         from .cost_tracking import SugarCRMCostTrackingBackend
-        SupportedServices.register_backend(SugarCRMService, SugarCRMBackend)
+        SupportedServices.register_backend(SugarCRMBackend)
         CostTrackingRegister.register(self.label, SugarCRMCostTrackingBackend)
