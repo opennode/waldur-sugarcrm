@@ -37,7 +37,7 @@ class SugarCRMBaseBackend(ServiceBackend):
 
     def destroy(self, crm):
         # CRM cannot be stopped by user - so we need to stop it before deletion on destroy
-        crm.schedule_stopping()
+        crm.state = crm.States.STOPPING_SCHEDULED
         crm.save()
         send_task('sugarcrm', 'stop_and_destroy_crm')(
             crm.uuid.hex,
