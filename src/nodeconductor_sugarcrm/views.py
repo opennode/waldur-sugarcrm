@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets, decorators
+from rest_framework import status, viewsets
 from rest_framework.response import Response
 
 from nodeconductor.structure import views as structure_views
@@ -34,14 +34,6 @@ class CRMViewSet(structure_views.BaseResourceViewSet):
             backend.destroy(resource)
         else:
             self.perform_destroy(resource)
-
-    @decorators.list_route()
-    def packages(self, request, *args, **kwargs):
-        packages = [
-            {'name': 'default', 'user_count': 10},
-            {'name': 'premium', 'user_count': 50}
-        ]
-        return Response(packages)
 
 
 class CRMUserViewSet(viewsets.ViewSet):
