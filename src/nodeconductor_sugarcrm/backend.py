@@ -31,8 +31,8 @@ class SugarCRMBackend(object):
 
 class SugarCRMBaseBackend(ServiceBackend):
 
-    def provision(self, crm, users_count):
-        Quota.objects.create(name='users_count', scope=crm, limit=users_count)
+    def provision(self, crm, user_count):
+        Quota.objects.create(name='user_count', scope=crm, limit=user_count)
         send_task('sugarcrm', 'provision_crm')(
             crm.uuid.hex,
         )
@@ -56,7 +56,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
 
     DEFAULT_USER_DATA = ("#cloud-config:\n"
                          "runcmd:\n"
-                         "  - [ bootstrap, -p, {adminpass}]")
+                         "  - [ bootstrap, -p, {password}]")
     DEFAULT_PROTOCOL = 'http'
     CRM_ADMIN_NAME = 'admin'
 
@@ -152,7 +152,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
         user_data = self.options.get('user_data', self.DEFAULT_USER_DATA)
         admin_username = self.CRM_ADMIN_NAME
         admin_password = pwgen()
-        user_data = user_data.format(password=admin_password)
+        user_data = user_data.format(password=admin_password, license_code=self.options['license_code'])
 
         template_data = [{
             'name': crm.name,
@@ -230,7 +230,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
             raise SugarCRMBackendError(
                 'Cannot create user %s on CRM "%s". Error: %s' % (user_name, self.crm.name, self.sugar_client.url, e))
 
-        self.crm.add_quota_usage('users_count', 1)
+        self.crm.add_quota_usage('user_count', 1)
         logger.info('Successfully created user "%s" for CRM "%s"', user_name, self.crm.name)
         return user
 
@@ -241,6 +241,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
             raise SugarCRMBackendError(
                 'Cannot delete user with id %s from CRM "%s". Error: %s' % (user.id, self.crm.name, e))
 
+        self.crm.add_quota_usage('user_count', -1)
         logger.info('Successfully deleted user with id %s on CRM "%s"', user.id, self.crm.name)
 
     def get_user(self, user_id):
@@ -258,7 +259,7 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
 
     def sync_user_quota(self):
         """ Sync CRM quotas with backend """
-        self.crm.set_quota_usage('users_count', len(self.list_users()))
+        self.crm.set_quota_usage('user_count', len(self.list_users()))
 
 
 class SugarCRMDummyBackend(SugarCRMBaseBackend):

@@ -18,7 +18,7 @@ class SugarCRMExtension(NodeConductorExtension):
         return {
             'sugarcrm-sync-crms-quotas': {
                 'task': 'nodeconductor.sugarcrm.sync_crms_quotas',
-                'schedule': timedelta(minutes=20),
+                'schedule': timedelta(days=1),
                 'args': ()
             },
         }

@@ -38,7 +38,7 @@ class CRM(QuotaModelMixin, structure_models.Resource, structure_models.PaidResou
     admin_username = models.CharField(max_length=60)
     admin_password = models.CharField(max_length=255)
 
-    QUOTAS_NAMES = ['users_count']
+    QUOTAS_NAMES = ['user_count']
 
     @classmethod
     def get_url_name(cls):

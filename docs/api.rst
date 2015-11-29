@@ -91,7 +91,7 @@ parameters:
  - description - CRM description (optional);
  - link to the service-project-link object;
  - size - Size of CRMs OpenStack instance data volume in MiB (default: 2048);
- - users_count - Max number of users in CRM (default: 10);
+ - user_count - Max number of users in CRM (default: 10);
 
 
  Example of a valid request:
@@ -109,7 +109,7 @@ parameters:
         "description": "sample description",
         "service_project_link": "http://example.com/api/sugarcrm-service-project-link/1/",
         "size": 1024,
-        "users_count": 20
+        "user_count": 20
     }
 
 

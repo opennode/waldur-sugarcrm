@@ -142,6 +142,12 @@ def delete(crm_uuid):
 @shared_task(name='nodeconductor.sugarcrm.sync_crms_quotas')
 def sync_crms_quotas():
     """ Update quota usage from backend for all CRMs """
-    for crm in CRM.objects.all():
-        backend = crm.get_backend()
-        backend.sync_user_quota()
+    for crm in CRM.objects.filter(state=CRM.States.ONLINE):
+        sync_crm_quotas.delay(crm.uuid.hex)
+
+
+@shared_task
+def sync_crm_quotas(crm_uuid):
+    crm = CRM.objects.get(uuid=crm_uuid)
+    backend = crm.get_backend()
+    backend.sync_user_quota()

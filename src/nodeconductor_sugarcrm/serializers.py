@@ -51,13 +51,13 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
         queryset=models.SugarCRMServiceProjectLink.objects.all(),
         write_only=True)
 
-    users_count = serializers.IntegerField(min_value=0, default=10, write_only=True)
+    user_count = serializers.IntegerField(min_value=0, default=10, write_only=True)
     quotas = quotas_serializers.QuotaSerializer(many=True, read_only=True)
 
     class Meta(structure_serializers.BaseResourceSerializer.Meta):
         model = models.CRM
         view_name = 'sugarcrm-crms-detail'
-        fields = structure_serializers.BaseResourceSerializer.Meta.fields + ('size', 'api_url', 'users_count', 'quotas')
+        fields = structure_serializers.BaseResourceSerializer.Meta.fields + ('size', 'api_url', 'user_count', 'quotas')
         read_only_fields = ('api_url', )
 
 
@@ -79,9 +79,9 @@ class CRMUserSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         crm = self.context['crm']
-        users_count_quota = crm.quotas.get(name='users_count')
-        if users_count_quota.is_exceeded(delta=1):
+        user_count_quota = crm.quotas.get(name='user_count')
+        if user_count_quota.is_exceeded(delta=1):
             raise serializers.ValidationError(
                 'User count quota is over limit (users count: %s, max users count: %s).' %
-                (users_count_quota.usage, users_count_quota.limit))
+                (user_count_quota.usage, user_count_quota.limit))
         return attrs
