@@ -22,6 +22,7 @@ The following rules for generation of the service settings are used:
                  (required, e.g.: http://example.com/api/template-groups/16c7675752244f5d9e870a2cb0cfeb02/);
  - username - NodeConductor user username (e.g. User);
  - password - NodeConductor user password (e.g. Password);
+ - license_code - License code that will be used for SugarCRM activation (required);
  - user_data - User data that will be passed to CRMs OpenStack instance on creation.
                Word {password} will be replaced with auto-generated admin password
                (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}]");
@@ -46,6 +47,7 @@ Example of a request:
         "backend_url": "http://example.com/api/template-groups/16c7675752244f5d9e870a2cb0cfeb02/",
         "username": "User",
         "password": "Password",
+        "license_code": "some-code"
     }
 
 
@@ -88,9 +90,8 @@ parameters:
  - name - CRM name;
  - description - CRM description (optional);
  - link to the service-project-link object;
- - api_url - sugarCRM API URL (temporary, will be populated from CRM instance properties in future);
- - admin_username - username of auto-created sugarCRM admin;
- - admin_password - password of auto-created sugarCRM admin;
+ - size - Size of CRMs OpenStack instance data volume in MiB (default: 2048);
+ - user_count - Max number of users in CRM (default: 10);
 
 
  Example of a valid request:
@@ -107,9 +108,8 @@ parameters:
         "name": "test CRM",
         "description": "sample description",
         "service_project_link": "http://example.com/api/sugarcrm-service-project-link/1/",
-        "api_url": "http://example.com",
-        "admin_username": "admin",
-        "admin_password": "admin"
+        "size": 1024,
+        "user_count": 20
     }
 
 

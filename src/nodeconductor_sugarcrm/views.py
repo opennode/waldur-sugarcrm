@@ -24,7 +24,7 @@ class CRMViewSet(structure_views.BaseOnlineResourceViewSet):
     def perform_provision(self, serializer):
         resource = serializer.save()
         backend = resource.get_backend()
-        backend.provision(resource)
+        backend.provision(resource, user_count=serializer.validated_data['user_count'])
 
 
 class CRMUserViewSet(viewsets.ViewSet):

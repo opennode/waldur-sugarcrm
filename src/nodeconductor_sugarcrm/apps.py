@@ -2,6 +2,7 @@ from django.apps import AppConfig
 
 from nodeconductor.cost_tracking import CostTrackingRegister
 from nodeconductor.structure import SupportedServices
+from nodeconductor.template import TemplateRegistry
 
 
 class SugarCRMConfig(AppConfig):
@@ -10,7 +11,14 @@ class SugarCRMConfig(AppConfig):
     service_name = 'SugarCRM'
 
     def ready(self):
+        # structure
         from .backend import SugarCRMBackend
-        from .cost_tracking import SugarCRMCostTrackingBackend
         SupportedServices.register_backend(SugarCRMBackend)
+
+        # cost tracking
+        from .cost_tracking import SugarCRMCostTrackingBackend
         CostTrackingRegister.register(self.label, SugarCRMCostTrackingBackend)
+
+        # template
+        from .template import CRMProvisionTemplateForm
+        TemplateRegistry.register(CRMProvisionTemplateForm)

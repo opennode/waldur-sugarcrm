@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
+from nodeconductor.quotas import serializers as quotas_serializers
 from nodeconductor.structure import serializers as structure_serializers
 from . import models
 
@@ -14,6 +15,7 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
         'password': 'NodeConductor user password (e.g. Password)',
     }
     SERVICE_ACCOUNT_EXTRA_FIELDS = {
+        'license_code': 'License code that will be used for SugarCRM activation. (required)',
         'user_data': 'User data that will be passed to CRMs OpenStack instance on creation.'
                      'Word {password} will be replaced with auto-generated admin password. '
                      ' (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}]")',
@@ -47,10 +49,13 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
         queryset=models.SugarCRMServiceProjectLink.objects.all(),
         write_only=True)
 
+    user_count = serializers.IntegerField(min_value=0, default=10, write_only=True)
+    quotas = quotas_serializers.QuotaSerializer(many=True, read_only=True)
+
     class Meta(structure_serializers.BaseResourceSerializer.Meta):
         model = models.CRM
         view_name = 'sugarcrm-crms-detail'
-        fields = structure_serializers.BaseResourceSerializer.Meta.fields + ('size', 'api_url',)
+        fields = structure_serializers.BaseResourceSerializer.Meta.fields + ('size', 'api_url', 'user_count', 'quotas')
         read_only_fields = ('api_url', )
 
 
@@ -69,3 +74,12 @@ class CRMUserSerializer(serializers.Serializer):
         crm = self.context['crm']
         request = self.context['request']
         return reverse('sugarcrm-users-detail', kwargs={'crm_uuid': crm.uuid.hex, 'pk': obj.id}, request=request)
+
+    def validate(self, attrs):
+        crm = self.context['crm']
+        user_count_quota = crm.quotas.get(name='user_count')
+        if user_count_quota.is_exceeded(delta=1):
+            raise serializers.ValidationError(
+                'User count quota is over limit (users count: %s, max users count: %s).' %
+                (user_count_quota.usage, user_count_quota.limit))
+        return attrs
