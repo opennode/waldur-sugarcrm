@@ -8,7 +8,7 @@ from nodeconductor.template.serializers import BaseTemplateSerializer
 from nodeconductor_sugarcrm import models
 
 
-# TODO: Filter service settings of defined type/
+# TODO: Filter service settings of defined type
 class CRMProvisionTemplateForm(TemplateForm):
     service_settings = forms.ModelChoiceField(
         label="SugarCRM service settings",
