@@ -3,13 +3,11 @@ from rest_framework.reverse import reverse
 
 from nodeconductor.quotas import serializers as quotas_serializers
 from nodeconductor.structure import serializers as structure_serializers
-from nodeconductor.structure import SupportedServices
 from . import models
 
 
 class ServiceSerializer(structure_serializers.BaseServiceSerializer):
 
-    SERVICE_TYPE = SupportedServices.Types.SugarCRM
     SERVICE_ACCOUNT_FIELDS = {
         'backend_url': 'URL of template group that describes OpenStack instance provision with default parameters'
                        '(required, e.g.: http://example.com/api/template-groups/16c7675752244f5d9e870a2cb0cfeb02/)',
