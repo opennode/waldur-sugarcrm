@@ -19,17 +19,12 @@ class SugarCRMBackendError(ServiceBackendError):
     pass
 
 
-class SugarCRMBackend(object):
-
-    def __init__(self, settings, *args, **kwargs):
-        backend_class = SugarCRMDummyBackend if settings.dummy else SugarCRMRealBackend
-        self.backend = backend_class(settings, *args, **kwargs)
-
-    def __getattr__(self, name):
-        return getattr(self.backend, name)
-
-
 class SugarCRMBaseBackend(ServiceBackend):
+
+    def __init__(self, settings, crm=None):
+        self.settings = settings
+        self.options = settings.options or {}
+        self.crm = crm
 
     def provision(self, crm, user_count):
         Quota.objects.create(name='user_count', scope=crm, limit=user_count)
@@ -46,7 +41,7 @@ class SugarCRMBaseBackend(ServiceBackend):
         )
 
 
-class SugarCRMRealBackend(SugarCRMBaseBackend):
+class SugarCRMBackend(SugarCRMBaseBackend):
     """ Sugar CRM backend methods
 
     Backend uses two clients for operations:
@@ -132,11 +127,11 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
             user.deleted = 1
             self.session.set_entry(user)
 
-    def __init__(self, settings, crm=None):
-        self.template_url = settings.backend_url
-        self.options = settings.options or {}
-        self.nc_client = self.NodeConductorOpenStackClient(self.template_url, settings.username, settings.password)
-        self.crm = crm
+    def __init__(self, *args, **kwargs):
+        super(SugarCRMBackend, self).__init__(*args, **kwargs)
+
+        self.nc_client = self.NodeConductorOpenStackClient(
+            self.settings.backend_url, self.settings.username, self.settings.password)
 
     @property
     def sugar_client(self):
@@ -260,7 +255,3 @@ class SugarCRMRealBackend(SugarCRMBaseBackend):
     def sync_user_quota(self):
         """ Sync CRM quotas with backend """
         self.crm.set_quota_usage('user_count', len(self.list_users()))
-
-
-class SugarCRMDummyBackend(SugarCRMBaseBackend):
-    pass
