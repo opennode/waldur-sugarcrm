@@ -15,7 +15,8 @@ def provision_crm(crm_uuid):
     chain(
         schedule_crm_instance_provision.si(crm_uuid),
         wait_for_crm_template_group_provision.si(crm_uuid),
-        init_crm_details.si(crm_uuid),
+        init_crm_api_url.si(crm_uuid),
+        init_crm_quotas.si(crm_uuid),
     ).apply_async(
         link=set_online.si(crm_uuid),
         link_error=set_erred.si(crm_uuid)
@@ -92,8 +93,8 @@ def wait_for_crm_template_group_provision(crm_uuid):
 
 
 @shared_task
-def init_crm_details(crm_uuid):
-    """ Init CRM quotas and API URL """
+def init_crm_api_url(crm_uuid):
+    """ Init CRM API URL """
     crm = CRM.objects.get(uuid=crm_uuid)
     options = crm.service_project_link.service.settings.options
     backend = crm.get_backend()
@@ -105,7 +106,21 @@ def init_crm_details(crm_uuid):
         protocol=options.get('protocol', backend.DEFAULT_PROTOCOL),
         external_ip=external_ips[0])
     crm.save()
-    backend.sync_user_quota()
+
+
+@shared_task(max_retries=30, default_retry_delay=10)
+@retry_if_false
+def init_crm_quotas(crm_uuid):
+    """ Init CRM quotas """
+    crm = CRM.objects.get(uuid=crm_uuid)
+    backend = crm.get_backend()
+    # It can take some time to initialize SugarCRM API, so we need to poll its API
+    try:
+        backend.sync_user_quota()
+    except SugarCRMBackendError:
+        return False
+    else:
+        return True
 
 
 @shared_task
