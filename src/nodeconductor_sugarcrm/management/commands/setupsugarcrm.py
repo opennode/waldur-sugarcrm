@@ -49,20 +49,25 @@ class Command(BaseCommand):
         customer = structure_models.Customer.objects.create(name=customer_name)
         self.created_instances.append(customer)
         customer_detail_url = self._get_admin_detail_url(customer)
-        self.stdout.write('  Customer was created with given name. You can edit it details here: {}'.format(
+        self.stdout.write('  Customer was created with given name. You can edit its details here: {}'.format(
             customer_detail_url))
         # project
         project_name = raw_input('  Enter project name [SugarCRM MO project]:') or 'SugarCRM MO project'
         project = structure_models.Project.objects.create(name=project_name, customer=customer)
         self.created_instances.append(project)
         project_detail_url = self._get_admin_detail_url(project)
-        self.stdout.write('  Project was created with given name. You can edit it details here: {}'.format(
+        self.stdout.write('  Project was created with given name. You can edit its details here: {}'.format(
             project_detail_url))
 
         self.stdout.write(self.style.MIGRATE_HEADING('Step 2: Owner for SugarCRM MO Customer'))
         # user
-        username = raw_input('  Enter username of SugarCRM customer owner[SugarCRM user]:') or 'SugarCRM user'
-        password = raw_input('  Enter password of SugarCRM customer owner[password]:') or 'password'
+        while True:
+            username = raw_input('  Enter username of SugarCRM customer owner [SugarCRM user]:') or 'SugarCRM user'
+            if get_user_model().objects.filter(username=username).exists():
+                self.stdout.write('  User with such username already exists. Please choose another one.')
+            else:
+                break
+        password = raw_input('  Enter password of SugarCRM customer owner [password]:') or 'password'
         user = get_user_model().objects.create_user(username=username, password=password)
         self.created_instances.append(user)
         customer.add_user(user, structure_models.CustomerRole.OWNER)
@@ -130,7 +135,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.MIGRATE_HEADING('Step 5: Template Group for OpenStack instance + Zabbix host'))
         # internal template group
         while True:
-            template_group_name = (raw_input('  Enter internal template group name[SugarCRM internal]:')
+            template_group_name = (raw_input('  Enter internal template group name [SugarCRM internal]:')
                                    or 'SugarCRM internal')
             if template_models.TemplateGroup.objects.filter(name=template_group_name).exists():
                 self.stdout.write(self.style.NOTICE(
@@ -182,7 +187,7 @@ class Command(BaseCommand):
         sugarcrm_settings_name = (raw_input('  Enter SugarCRM service settings name [SugarCRM settings]:') or
                                   'SugarCRM settings')
         license_code = raw_input('  Enter SugarCRM license code:')
-        protocol = raw_input('  Enter SugarCRM CRMs protocol[http]:') or 'http'
+        protocol = raw_input('  Enter SugarCRM CRMs protocol [http]:') or 'http'
         tg_url = self.base_url + reverse('template-group-detail', args=(template_group.uuid.hex,))
         sugarcrm_settings = structure_models.ServiceSettings.objects.create(
             name=sugarcrm_settings_name,
@@ -199,7 +204,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.MIGRATE_HEADING('Step 7: SugarCRM template group'))
         # external template group
         while True:
-            template_group_name = raw_input('  Enter SugarCRM external template group name[SugarCRM]:') or 'SugarCRM'
+            template_group_name = raw_input('  Enter SugarCRM external template group name [SugarCRM]:') or 'SugarCRM'
             if template_models.TemplateGroup.objects.filter(name=template_group_name).exists():
                 self.stdout.write(self.style.NOTICE(
                     '  Template group with such name already exists. Enter another one.'))
@@ -218,14 +223,12 @@ class Command(BaseCommand):
         )
         self.created_instances.append(template)
         template_group_admin_url = self._get_admin_detail_url(template_group)
-        self.stdout.write('  External template group with templates was created successfully, you can edit it details '
+        self.stdout.write('  External template group with templates was created successfully, you can edit its details '
                           'here: {}'.format(template_group_admin_url))
         self.stdout.write(self.style.MIGRATE_HEADING('SugarCRM setup was finished successfully.'))
         template_group_url = self.base_url + reverse('template-group-detail', args=(template_group.uuid.hex,))
         self.stdout.write('To test SugarCRM setup try to execute POST request against {} '
                           '("name" and "project" parameters are required)'.format(template_group_url + 'provision/'))
-        raw_input('Press enter to finish')
-        raise Exception('Huray!')
 
     def rollback(self):
         for instance in self.created_instances[::-1]:
