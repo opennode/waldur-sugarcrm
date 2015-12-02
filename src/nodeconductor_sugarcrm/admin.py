@@ -36,6 +36,10 @@ class CRMAdmin(structure_admin.ResourceAdmin):
     sync_quotas.short_description = "Sync quotas"
 
 
+class SugarCRMServiceProjectLinkAdmin(structure_admin.ServiceProjectLinkAdmin):
+    inlines = [QuotaInline]
+
+
 admin.site.register(CRM, CRMAdmin)
 admin.site.register(SugarCRMService, structure_admin.ServiceAdmin)
-admin.site.register(SugarCRMServiceProjectLink, structure_admin.ServiceProjectLinkAdmin)
+admin.site.register(SugarCRMServiceProjectLink, SugarCRMServiceProjectLinkAdmin)

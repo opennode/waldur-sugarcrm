@@ -16,8 +16,10 @@ class SugarCRMService(structure_models.Service):
         return 'sugarcrm'
 
 
-class SugarCRMServiceProjectLink(structure_models.ServiceProjectLink):
+class SugarCRMServiceProjectLink(QuotaModelMixin, structure_models.ServiceProjectLink):
     service = models.ForeignKey(SugarCRMService)
+
+    QUOTAS_NAMES = ['user_limit_count']
 
     class Meta:
         unique_together = ('service', 'project')
