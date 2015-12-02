@@ -31,6 +31,7 @@ def init_spls_quotas(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('contenttypes', '0001_initial'),
         ('nodeconductor_sugarcrm', '0006_resource_error_message'),
     ]
 
