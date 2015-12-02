@@ -28,6 +28,7 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
 
 
 class ServiceProjectLinkSerializer(structure_serializers.BaseServiceProjectLinkSerializer):
+    quotas = quotas_serializers.QuotaSerializer(many=True, read_only=True)
 
     class Meta(structure_serializers.BaseServiceProjectLinkSerializer.Meta):
         model = models.SugarCRMServiceProjectLink
@@ -35,9 +36,11 @@ class ServiceProjectLinkSerializer(structure_serializers.BaseServiceProjectLinkS
         extra_kwargs = {
             'service': {'lookup_field': 'uuid', 'view_name': 'sugarcrm-detail'},
         }
+        fields = structure_serializers.BaseServiceProjectLinkSerializer.Meta.fields + ('quotas',)
 
 
 class CRMSerializer(structure_serializers.BaseResourceSerializer):
+    DEFAULT_USER_COUNT = 10
     service = serializers.HyperlinkedRelatedField(
         source='service_project_link.service',
         view_name='sugarcrm-detail',
@@ -49,7 +52,7 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
         queryset=models.SugarCRMServiceProjectLink.objects.all(),
         write_only=True)
 
-    user_count = serializers.IntegerField(min_value=0, default=10, write_only=True)
+    user_count = serializers.IntegerField(min_value=0, default=DEFAULT_USER_COUNT, write_only=True)
     quotas = quotas_serializers.QuotaSerializer(many=True, read_only=True)
 
     class Meta(structure_serializers.BaseResourceSerializer.Meta):
@@ -57,6 +60,16 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
         view_name = 'sugarcrm-crms-detail'
         fields = structure_serializers.BaseResourceSerializer.Meta.fields + ('size', 'api_url', 'user_count', 'quotas')
         read_only_fields = ('api_url', )
+
+    def validate(self, attrs):
+        spl = attrs['service_project_link']
+        quota = spl.quotas.get(name='user_limit_count')
+        delta = attrs.get('user_count', self.DEFAULT_USER_COUNT)
+        if quota.is_exceeded(delta=delta):
+            raise serializers.ValidationError(
+                'Service project link users count quota is over limit (limit: %s, required: %s)' %
+                (quota.limit, quota.usage + delta))
+        return attrs
 
 
 class CRMUserSerializer(serializers.Serializer):
