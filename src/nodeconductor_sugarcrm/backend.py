@@ -51,7 +51,7 @@ class SugarCRMBackend(SugarCRMBaseBackend):
 
     DEFAULT_USER_DATA = ("#cloud-config:\n"
                          "runcmd:\n"
-                         "  - [ bootstrap, -p, {password}]")
+                         "  - [ bootstrap, -p, {password}, -k, {license_code}, -v]")
     DEFAULT_PROTOCOL = 'http'
     CRM_ADMIN_NAME = 'admin'
 
@@ -130,8 +130,9 @@ class SugarCRMBackend(SugarCRMBaseBackend):
     def __init__(self, *args, **kwargs):
         super(SugarCRMBackend, self).__init__(*args, **kwargs)
 
+        self.template_url = self.settings.backend_url
         self.nc_client = self.NodeConductorOpenStackClient(
-            self.settings.backend_url, self.settings.username, self.settings.password)
+            self.template_url, self.settings.username, self.settings.password)
 
     @property
     def sugar_client(self):

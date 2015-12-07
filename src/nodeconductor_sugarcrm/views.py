@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, exceptions
 from rest_framework.response import Response
 
 from nodeconductor.structure import views as structure_views
@@ -27,12 +27,18 @@ class CRMViewSet(structure_views.BaseOnlineResourceViewSet):
         backend.provision(resource, user_count=serializer.validated_data['user_count'])
 
 
+class CRMNotOnline(exceptions.APIException):
+    status_code = 409
+
+
 class CRMUserViewSet(viewsets.ViewSet):
 
     def initial(self, request, crm_uuid, *args, **kwargs):
         super(CRMUserViewSet, self).initial(request, crm_uuid, *args, **kwargs)
         queryset = filter_queryset_for_user(models.CRM.objects.all(), request.user)
         self.crm = get_object_or_404(queryset, uuid=crm_uuid)
+        if self.crm.state != models.CRM.States.ONLINE:
+            raise CRMNotOnline('Cannot execute user-related operations with CRM if it is not ONLINE')
         self.backend = self.crm.get_backend()
 
     def get_serializer_context(self):
