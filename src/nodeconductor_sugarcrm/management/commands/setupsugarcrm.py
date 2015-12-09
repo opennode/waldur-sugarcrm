@@ -176,7 +176,9 @@ class Command(BaseCommand):
             host_template = template_group.templates.create(
                 order_number=2,
                 resource_content_type=ContentType.objects.get_for_model(zabbix_models.Host),
-                options={'name': '{{ response.uuid }}', 'visible_name': '{{ response.name }}',
+                options={'name': '{{ response.backend_id }}',
+                         'visible_name': '{{ response.name }}',
+                         'scope': '{{ response.url }}',
                          'project': project_url, 'service': service_url})
             self.created_instances.append(host_template)
         self.stdout.write('  Zabbix host template was created successfully.')
@@ -188,6 +190,13 @@ class Command(BaseCommand):
                                   'SugarCRM settings')
         license_code = raw_input('  Enter SugarCRM license code:')
         protocol = raw_input('  Enter SugarCRM CRMs protocol [http]:') or 'http'
+        while True:
+            shared = raw_input('  Make settings shared? [Y/n]:') or 'y'
+            if shared.lower() not in ('y', 'n'):
+                self.stdout.write('  Please enter letter "y" or "n"')
+            else:
+                shared = shared.lower() == 'y'
+                break
         tg_url = self.base_url + reverse('template-group-detail', args=(template_group.uuid.hex,))
         sugarcrm_settings = structure_models.ServiceSettings.objects.create(
             name=sugarcrm_settings_name,
@@ -195,6 +204,7 @@ class Command(BaseCommand):
             username=username,
             password=password,
             type='SugarCRM',
+            shared=shared,
             options={'license_code': license_code, 'protocol': protocol})
         self.created_instances.append(sugarcrm_settings)
         settings_admin_url = self._get_admin_detail_url(sugarcrm_settings)
@@ -212,7 +222,6 @@ class Command(BaseCommand):
                 break
         template_group = template_models.TemplateGroup.objects.create(name=template_group_name)
         template_group.tags.add('SaaS')
-        template_group.tags.add('external')
         self.created_instances.append(template_group)
         # templates for template group
         settings_url = self.base_url + reverse('servicesettings-detail', args=(sugarcrm_settings.uuid.hex,))

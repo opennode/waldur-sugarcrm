@@ -11,6 +11,10 @@ class SugarCRMService(structure_models.Service):
     projects = models.ManyToManyField(
         structure_models.Project, related_name='sugarcrm_services', through='SugarCRMServiceProjectLink')
 
+    class Meta:
+        verbose_name = 'SugarCRM service'
+        verbose_name_plural = 'SugarCRM services'
+
     @classmethod
     def get_url_name(cls):
         return 'sugarcrm'
@@ -23,6 +27,8 @@ class SugarCRMServiceProjectLink(QuotaModelMixin, structure_models.ServiceProjec
 
     class Meta:
         unique_together = ('service', 'project')
+        verbose_name = 'SugarCRM service project link'
+        verbose_name_plural = 'SugarCRM service project links'
 
     @classmethod
     def get_url_name(cls):
@@ -41,6 +47,10 @@ class CRM(QuotaModelMixin, structure_models.Resource, structure_models.PaidResou
     admin_password = models.CharField(max_length=255)
 
     QUOTAS_NAMES = ['user_count']
+
+    class Meta:
+        verbose_name = 'CRM'
+        verbose_name_plural = 'CRMs'
 
     @classmethod
     def get_url_name(cls):
