@@ -119,9 +119,12 @@ class SugarCRMBackend(SugarCRMBaseBackend):
         def get_user(self, user_id):
             return self.session.get_entry('Users', user_id)
 
-        def list_users(self):
-            user_query = sugarcrm.User()
-            return self.session.get_entry_list(user_query)
+        def list_users(self, **kwargs):
+            # admin user should not be visible
+            user_query = sugarcrm.User(is_admin='0')
+            users = self.session.get_entry_list(user_query)
+            # XXX: SugarCRM cannot filter 2 arguments together - its easier to filter users here.
+            return [user for user in users if all(getattr(user, k) == v for k, v in kwargs.items())]
 
         def delete_user(self, user):
             user.deleted = 1
@@ -247,9 +250,9 @@ class SugarCRMBackend(SugarCRMBaseBackend):
             raise SugarCRMBackendError(
                 'Cannot get user with id %s from CRM "%s". Error: %s' % (user_id, self.crm.name, e))
 
-    def list_users(self):
+    def list_users(self, **kwargs):
         try:
-            return self.sugar_client.list_users()
+            return self.sugar_client.list_users(**kwargs)
         except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError('Cannot get users from CRM "%s". Error: %s' % (self.crm.name, e))
 
