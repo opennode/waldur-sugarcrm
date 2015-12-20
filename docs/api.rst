@@ -229,7 +229,7 @@ Example of a request:
 
 .. code-block:: http
 
-    PATCH /api/sugarcrm/24156c367e3a41eea81e374073fa1060/users/cc420109-a419-3d5b-558b-567168cf750f/ HTTP/1.1
+    PUT /api/sugarcrm/24156c367e3a41eea81e374073fa1060/users/cc420109-a419-3d5b-558b-567168cf750f/ HTTP/1.1
     Content-Type: application/json
     Accept: application/json
     Authorization: Token c84d653b9ec92c6cbac41c706593e66f567a7fa4
