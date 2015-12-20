@@ -83,6 +83,14 @@ class CRMUserSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=30, required=False)
     email = serializers.CharField(source='email1', max_length=255, required=False)
 
+    def get_fields(self):
+        fields = super(CRMUserSerializer, self).get_fields()
+        # mark fields as not required on update
+        if self.instance is not None:
+            for field in fields.values():
+                field.required = False
+        return fields
+
     def get_url(self, obj):
         crm = self.context['crm']
         request = self.context['request']

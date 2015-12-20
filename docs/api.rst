@@ -168,23 +168,22 @@ Supported filters:
  ?first_name
  ?last_name
  ?status
- ?active
 
 Response example:
 
 .. code-block:: javascript
 
-[
-    {
-        "url": "http://example.com/api/sugarcrm-crms/24156c367e3a41eea81e374073fa1060/users/a67a5b55-bb5f-1259-60a2-562e3c88fb34/",
-        "id": "a67a5b55-bb5f-1259-60a2-562e3c88fb34",
-        "user_name": "user",
-        "status": "Active",
-        "last_name": "User",
-        "first_name": "",
-        "email": "user@example.com"
-    }
-]
+    [
+        {
+            "url": "http://example.com/api/sugarcrm-crms/24156c367e3a41eea81e374073fa1060/users/a67a5b55-bb5f-1259-60a2-562e3c88fb34/",
+            "id": "a67a5b55-bb5f-1259-60a2-562e3c88fb34",
+            "user_name": "user",
+            "status": "Active",
+            "last_name": "User",
+            "first_name": "",
+            "email": "user@example.com"
+        }
+    ]
 
 
 Create new CRM user
@@ -216,6 +215,28 @@ Example of a request:
         "user_name": "test_user",
         "password": "test_user",
         "last_name": "test user last name"
+    }
+
+
+Update CRM user
+---------------
+
+To update CRM user - issue PATCH request against **/api/sugarcrm-crms/<crm_uuid>/users/<user_id>/**.
+
+
+Example of a request:
+
+
+.. code-block:: http
+
+    PUT /api/sugarcrm/24156c367e3a41eea81e374073fa1060/users/cc420109-a419-3d5b-558b-567168cf750f/ HTTP/1.1
+    Content-Type: application/json
+    Accept: application/json
+    Authorization: Token c84d653b9ec92c6cbac41c706593e66f567a7fa4
+    Host: example.com
+
+    {
+        "email": "test_user@example.com",
     }
 
 
