@@ -168,7 +168,6 @@ Supported filters:
  ?first_name
  ?last_name
  ?status
- ?active
 
 Response example:
 
@@ -222,7 +221,23 @@ Example of a request:
 Update CRM user
 ---------------
 
-TODO
+To update CRM user - issue PATCH request against **/api/sugarcrm-crms/<crm_uuid>/users/<user_id>/**.
+
+
+Example of a request:
+
+
+.. code-block:: http
+
+    PATCH /api/sugarcrm/24156c367e3a41eea81e374073fa1060/users/cc420109-a419-3d5b-558b-567168cf750f/ HTTP/1.1
+    Content-Type: application/json
+    Accept: application/json
+    Authorization: Token c84d653b9ec92c6cbac41c706593e66f567a7fa4
+    Host: example.com
+
+    {
+        "email": "test_user@example.com",
+    }
 
 
 Delete CRM user
