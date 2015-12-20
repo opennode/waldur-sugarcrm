@@ -166,17 +166,17 @@ Response example:
 
 .. code-block:: javascript
 
-[
-    {
-        "url": "http://example.com/api/sugarcrm-crms/24156c367e3a41eea81e374073fa1060/users/a67a5b55-bb5f-1259-60a2-562e3c88fb34/",
-        "id": "a67a5b55-bb5f-1259-60a2-562e3c88fb34",
-        "user_name": "user",
-        "status": "Active",
-        "last_name": "User",
-        "first_name": "",
-        "email": "user@example.com"
-    }
-]
+    [
+        {
+            "url": "http://example.com/api/sugarcrm-crms/24156c367e3a41eea81e374073fa1060/users/a67a5b55-bb5f-1259-60a2-562e3c88fb34/",
+            "id": "a67a5b55-bb5f-1259-60a2-562e3c88fb34",
+            "user_name": "user",
+            "status": "Active",
+            "last_name": "User",
+            "first_name": "",
+            "email": "user@example.com"
+        }
+    ]
 
 
 Create new CRM user
@@ -209,6 +209,12 @@ Example of a request:
         "password": "test_user",
         "last_name": "test user last name"
     }
+
+
+Update CRM user
+---------------
+
+TODO
 
 
 Delete CRM user
