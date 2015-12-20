@@ -148,7 +148,10 @@ class SugarCRMBackend(SugarCRMBaseBackend):
             return self._sugar_client
         if self.crm is None:
             raise SugarCRMBackendError('It is impossible to use sugar client if CRM is not specified for backend.')
-        self._sugar_client = self.SugarCRMClient(self.crm.api_url, self.crm.admin_username, self.crm.admin_password)
+        try:
+            self._sugar_client = self.SugarCRMClient(self.crm.api_url, self.crm.admin_username, self.crm.admin_password)
+        except KeyError:
+            raise SugarCRMBackendError('Cannot connect to CRM backend.')
         return self._sugar_client
 
     def schedule_crm_instance_provision(self, crm):
