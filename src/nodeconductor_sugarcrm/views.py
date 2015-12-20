@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from nodeconductor.structure import views as structure_views
 from nodeconductor.structure.managers import filter_queryset_for_user
-from . import models, serializers
+from . import models, serializers, backend
 
 
 class SugarCRMServiceViewSet(structure_views.BaseServiceViewSet):
@@ -40,6 +40,15 @@ class CRMUserViewSet(viewsets.ViewSet):
         if self.crm.state != models.CRM.States.ONLINE:
             raise CRMNotOnline('Cannot execute user-related operations with CRM if it is not ONLINE')
         self.backend = self.crm.get_backend()
+
+    def handle_exception(self, exc):
+        if isinstance(exc, backend.SugarCRMBackendError):
+            self.crm.set_erred()
+            self.crm.error_message = str(exc)
+            self.crm.save()
+            return super(CRMUserViewSet, self).handle_exception(
+                CRMNotOnline('Error appeared during request to CRM API.'))
+        return super(CRMUserViewSet, self).handle_exception(exc)
 
     def get_serializer_context(self):
         return {'crm': self.crm, 'request': self.request}
