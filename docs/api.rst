@@ -162,6 +162,14 @@ List CRM users
 To get list of all registered on CRM users - issue GET request against **/api/sugarcrm-crms/<crm_uuid>/users/**.
 Only users with view access to CRM can view CRM users.
 
+Supported filters:
+
+ ?user_name
+ ?first_name
+ ?last_name
+ ?status
+ ?active
+
 Response example:
 
 .. code-block:: javascript

@@ -44,8 +44,14 @@ class CRMUserViewSet(viewsets.ViewSet):
     def get_serializer_context(self):
         return {'crm': self.crm, 'request': self.request}
 
+    # XXX: This method should be replaced by default filter then CRM users will be moved to separate model
+    def get_filtered_users(self, request):
+        supported_filters = ['first_name', 'last_name', 'user_name', 'status']
+        filter_kwargs = {f: request.query_params[f] for f in supported_filters if f in request.query_params}
+        return self.backend.list_users(**filter_kwargs)
+
     def list(self, request, crm_uuid):
-        users = [user for user in self.backend.list_users() if not int(user.is_admin)]
+        users = self.get_filtered_users(request)
         serializer = serializers.CRMUserSerializer(users, many=True, context=self.get_serializer_context())
         return Response(serializer.data)
 
