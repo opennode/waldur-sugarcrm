@@ -116,6 +116,11 @@ class SugarCRMBackend(SugarCRMBaseBackend):
                 setattr(user, key, value)
             return self.session.set_entry(user)
 
+        def update_user(self, user, **kwargs):
+            for key, value in kwargs.items():
+                setattr(user, key, value)
+            return self.session.set_entry(user)
+
         def get_user(self, user_id):
             return self.session.get_entry('Users', user_id)
 
@@ -227,10 +232,20 @@ class SugarCRMBackend(SugarCRMBaseBackend):
                 user_name=user_name, user_hash=encoded_password, last_name=last_name, **kwargs)
         except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
             raise SugarCRMBackendError(
-                'Cannot create user %s on CRM "%s". Error: %s' % (user_name, self.crm.name, self.sugar_client.url, e))
+                'Cannot create user %s on CRM "%s". Error: %s' % (user_name, self.crm.name, e))
 
         self.crm.add_quota_usage('user_count', 1)
         logger.info('Successfully created user "%s" for CRM "%s"', user_name, self.crm.name)
+        return user
+
+    def update_user(self, user, **kwargs):
+        try:
+            user = self.sugar_client.update_user(user, **kwargs)
+        except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
+            raise SugarCRMBackendError(
+                'Cannot update user %s on CRM "%s". Error: %s' % (user.user_name, self.crm.name, e))
+
+        logger.info('Successfully updated user "%s" for CRM "%s"', user.user_name, self.crm.name)
         return user
 
     def delete_user(self, user):

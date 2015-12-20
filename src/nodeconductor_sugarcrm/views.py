@@ -75,3 +75,14 @@ class CRMUserViewSet(viewsets.ViewSet):
         user = self.backend.create_user(status='Active', **serializer.validated_data)
         user_data = serializers.CRMUserSerializer(user, context=self.get_serializer_context()).data
         return Response(user_data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request, crm_uuid, pk=None):
+        user = self.backend.get_user(pk)
+        if user is None or int(user.is_admin):
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = serializers.CRMUserSerializer(
+            data=request.data, instance=user, context=self.get_serializer_context())
+        serializer.is_valid(raise_exception=True)
+        user = self.backend.update_user(user, **serializer.validated_data)
+        user_data = serializers.CRMUserSerializer(user, context=self.get_serializer_context()).data
+        return Response(user_data, status.HTTP_200_OK)
