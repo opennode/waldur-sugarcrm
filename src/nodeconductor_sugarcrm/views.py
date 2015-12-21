@@ -86,7 +86,7 @@ class CRMUserViewSet(viewsets.ViewSet):
         return Response(user_data, status=status.HTTP_201_CREATED)
 
     def update(self, request, crm_uuid, pk=None):
-        return self.partial_update(self, request, crm_uuid, pk=None)
+        return self.partial_update(request, crm_uuid, pk=pk)
 
     def partial_update(self, request, crm_uuid, pk=None):
         user = self.backend.get_user(pk)
