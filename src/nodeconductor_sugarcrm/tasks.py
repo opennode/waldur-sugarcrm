@@ -1,6 +1,8 @@
 import logging
+import sys
 
 from celery import shared_task, chain
+from django.utils import six
 
 from nodeconductor.core.tasks import save_error_message, transition, retry_if_false
 from .backend import SugarCRMBackendError
@@ -24,7 +26,11 @@ def provision_crm(crm_uuid):
 
 
 @shared_task(name='nodeconductor.sugarcrm.stop_and_destroy_crm')
-def stop_and_destroy_crm(crm_uuid):
+def stop_and_destroy_crm(crm_uuid, force=False):
+    if not force:
+        error_callback = set_erred.si(crm_uuid)
+    else:
+        error_callback = force_delete.si(crm_uuid)
     chain(
         schedule_crm_instance_stopping.si(crm_uuid),
         wait_for_crm_instance_state.si(crm_uuid, state='Offline'),
@@ -33,7 +39,7 @@ def stop_and_destroy_crm(crm_uuid):
         schedule_crm_instance_deletion.si(crm_uuid),
     ).apply_async(
         link=delete.si(crm_uuid),
-        link_error=set_erred.si(crm_uuid),
+        link_error=error_callback,
     )
 
 
@@ -150,6 +156,19 @@ def set_erred(crm_uuid, transition_entity=None):
 @shared_task
 def delete(crm_uuid):
     CRM.objects.get(uuid=crm_uuid).delete()
+
+
+@shared_task
+def force_delete(crm_uuid):
+    """ Schedule corresponding OpenStack instance deletion """
+    crm = CRM.objects.get(uuid=crm_uuid)
+    backend = crm.get_backend()
+    try:
+        backend.schedule_crm_instance_deletion(crm)
+    except:
+        six.reraise(*sys.exc_info())
+    finally:
+        crm.delete()
 
 
 # celerybeat tasks:

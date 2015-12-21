@@ -38,6 +38,7 @@ class SugarCRMBaseBackend(ServiceBackend):
         crm.save()
         send_task('sugarcrm', 'stop_and_destroy_crm')(
             crm.uuid.hex,
+            force=force,
         )
 
 
