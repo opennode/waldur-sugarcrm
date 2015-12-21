@@ -27,7 +27,6 @@ def provision_crm(crm_uuid):
 
 @shared_task(name='nodeconductor.sugarcrm.stop_and_destroy_crm')
 def stop_and_destroy_crm(crm_uuid, force=False):
-    print 'force', force
     if not force:
         error_callback = set_erred.si(crm_uuid)
     else:
