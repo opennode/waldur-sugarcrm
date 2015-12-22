@@ -29,7 +29,6 @@ The following rules for generation of the service settings are used:
  - protocol - CRMs access protocol. (default: "http");
 
 
-
 Example of a request:
 
 
@@ -90,7 +89,6 @@ parameters:
  - name - CRM name;
  - description - CRM description (optional);
  - link to the service-project-link object;
- - size - Size of CRMs OpenStack instance data volume in MiB (default: 2048);
  - user_count - Max number of users in CRM (default: 10);
 
 

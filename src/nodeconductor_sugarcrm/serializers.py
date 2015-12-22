@@ -3,7 +3,7 @@ from rest_framework.reverse import reverse
 
 from nodeconductor.quotas import serializers as quotas_serializers
 from nodeconductor.structure import serializers as structure_serializers
-from . import models
+from . import models, backend
 
 
 class ServiceSerializer(structure_serializers.BaseServiceSerializer):
@@ -25,6 +25,12 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
     class Meta(structure_serializers.BaseServiceSerializer.Meta):
         model = models.SugarCRMService
         view_name = 'sugarcrm-detail'
+
+    def get_fields(self):
+        fields = super(ServiceSerializer, self).get_fields()
+        fields['protocol'].initial = backend.SugarCRMBackend.DEFAULT_PROTOCOL
+        fields['user_data'].initial = backend.SugarCRMBackend.DEFAULT_USER_DATA
+        return fields
 
 
 class ServiceProjectLinkSerializer(structure_serializers.BaseServiceProjectLinkSerializer):
@@ -58,7 +64,7 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
     class Meta(structure_serializers.BaseResourceSerializer.Meta):
         model = models.CRM
         view_name = 'sugarcrm-crms-detail'
-        fields = structure_serializers.BaseResourceSerializer.Meta.fields + ('size', 'api_url', 'user_count', 'quotas')
+        fields = structure_serializers.BaseResourceSerializer.Meta.fields + ('api_url', 'user_count', 'quotas')
         read_only_fields = ('api_url', )
 
     def validate(self, attrs):
