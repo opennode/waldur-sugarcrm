@@ -156,7 +156,7 @@ class Command(BaseCommand):
         template_group_detail_url = self._get_admin_detail_url(template_group)
         self.stdout.write('  Base OpenStack template group was created successfully.')
         while True:
-            required_fields = 'flavor', 'image', 'system_volume_size', 'security_groups'
+            required_fields = 'flavor', 'image', 'system_volume_size', 'security_groups', 'data_volume_size'
             self.stdout.write('  Please go to URL {} and define {} for OpenStack instance template'.format(
                 ', '.join(required_fields), template_group_detail_url))
             raw_input('  Press enter to continue')

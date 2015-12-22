@@ -1,4 +1,3 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from nodeconductor.quotas.models import QuotaModelMixin
@@ -14,6 +13,7 @@ class SugarCRMService(structure_models.Service):
     class Meta:
         verbose_name = 'SugarCRM service'
         verbose_name_plural = 'SugarCRM services'
+        unique_together = ('customer', 'settings')
 
     @classmethod
     def get_url_name(cls):
@@ -39,9 +39,6 @@ class CRM(QuotaModelMixin, structure_models.Resource, structure_models.PaidResou
     service_project_link = models.ForeignKey(
         SugarCRMServiceProjectLink, related_name='crms', on_delete=models.PROTECT)
 
-    size = models.PositiveIntegerField(
-        default=2 * 1024, help_text='Size of CRMs OpenStack instance data volume in MiB',
-        validators=[MinValueValidator(1024), MaxValueValidator(10 * 1024)])
     api_url = models.CharField(max_length=127, help_text='CRMs OpenStack instance URL')
     admin_username = models.CharField(max_length=60)
     admin_password = models.CharField(max_length=255)
