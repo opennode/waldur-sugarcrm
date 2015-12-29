@@ -81,7 +81,7 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
 class CRMUserSerializer(serializers.Serializer):
 
     url = serializers.SerializerMethodField()
-    id = serializers.CharField(read_only=True)
+    uuid = serializers.CharField(read_only=True, source='id')
     user_name = serializers.CharField(max_length=60)
     password = serializers.CharField(write_only=True, max_length=255)
     status = serializers.CharField(read_only=True)

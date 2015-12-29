@@ -174,7 +174,7 @@ Response example:
     [
         {
             "url": "http://example.com/api/sugarcrm-crms/24156c367e3a41eea81e374073fa1060/users/a67a5b55-bb5f-1259-60a2-562e3c88fb34/",
-            "id": "a67a5b55-bb5f-1259-60a2-562e3c88fb34",
+            "uuid": "a67a5b55-bb5f-1259-60a2-562e3c88fb34",
             "user_name": "user",
             "status": "Active",
             "last_name": "User",
