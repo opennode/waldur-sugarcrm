@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 from setuptools import setup, find_packages
 
 
@@ -10,6 +11,22 @@ install_requires = [
     'nodeconductor>0.81.0',
     'sugarcrm>=0.1.1',
 ]
+
+# RPM installation does not need oslo, cliff and stevedore libs -
+# they are required only for installation with setuptools
+try:
+    action = sys.argv[1]
+except IndexError:
+    pass
+else:
+    if action in ['develop', 'install', 'test']:
+        install_requires += [
+            'cliff==1.7.0',
+            'oslo.config==1.4.0',
+            'oslo.i18n==1.0.0',
+            'oslo.utils==1.0.0',
+            'stevedore==1.0.0',
+        ]
 
 
 setup(
