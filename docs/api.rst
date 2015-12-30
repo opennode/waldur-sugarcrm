@@ -162,10 +162,10 @@ Only users with view access to CRM can view CRM users.
 
 Supported filters:
 
- ?user_name
- ?first_name
- ?last_name
- ?status
+ - ?user_name
+ - ?first_name
+ - ?last_name
+ - ?status - the status can be Active, Inactive or Reserved.
 
 Response example:
 
