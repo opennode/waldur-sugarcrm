@@ -3,6 +3,7 @@ import sys
 
 from celery import shared_task, chain
 from django.utils import six
+from django.utils import timezone
 
 from nodeconductor.core.tasks import save_error_message, transition, retry_if_false
 from .backend import SugarCRMBackendError
@@ -111,6 +112,9 @@ def init_crm_api_url(crm_uuid):
     crm.api_url = '{protocol}://{external_ip}'.format(
         protocol=options.get('protocol', backend.DEFAULT_PROTOCOL),
         external_ip=external_ips[0])
+    # we consider CRM as activated at this point
+    crm.start_time = timezone.now()
+
     crm.save()
 
 
