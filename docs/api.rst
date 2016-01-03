@@ -89,7 +89,7 @@ parameters:
  - name - CRM name;
  - description - CRM description (optional);
  - link to the service-project-link object;
- - user_count - Max number of users in CRM (default: 10);
+ - user_count - maximal number of users in CRM (default: 10);
 
 
  Example of a valid request:
@@ -114,7 +114,7 @@ parameters:
 CRM display
 -----------
 
-To get CRM data - issue GET request against **/api/sugarcrm-crms/<crm_uuid>/**.
+To get CRM data issue GET request against **/api/sugarcrm-crms/<crm_uuid>/**.
 
 Example rendering of the CRM object:
 
@@ -124,29 +124,26 @@ Example rendering of the CRM object:
         {
             "url": "http://example.com/api/sugarcrm-crms/7693d9308e0641baa95720d0046e5696/",
             "uuid": "7693d9308e0641baa95720d0046e5696",
-            "name": "pavel-test-sugarcrm-11",
+            "name": "test-sugarcrm",
             "description": "",
-            "start_time": null,
+            "start_time": "2015-10-19T08:06:15Z",
             "service": "http://example.com/api/sugarcrm/655b79490b63442d9264d76ab9478f62/",
-            "service_name": "local sugarcrm service",
+            "service_name": "sugarcrm service",
             "service_uuid": "655b79490b63442d9264d76ab9478f62",
             "project": "http://example.com/api/projects/0e86f04bb1fd48e181742d0598db69d5/",
-            "project_name": "local sugarcrm project",
+            "project_name": "sugarcrm project",
             "project_uuid": "0e86f04bb1fd48e181742d0598db69d5",
             "customer": "http://example.com/api/customers/3b0fc2c0f0ed4f40b26126dc9cbd8f9f/",
-            "customer_name": "local sugarcrm customer",
+            "customer_name": "sugarcrm customer",
             "customer_native_name": "",
             "customer_abbreviation": "",
             "project_groups": [],
             "resource_type": "SugarCRM.CRM",
             "state": "Provisioning",
             "created": "2015-10-20T10:35:19.146Z",
-            "api_url": "http://example.com",
-            "admin_username": "admin",
-            "admin_password": "admin"
+            "api_url": "http://example.com"
         }
     ]
-
 
 Delete CRM
 ----------
@@ -216,8 +213,8 @@ Example of a request:
     }
 
 
-Update CRM user
----------------
+Update a CRM user
+-----------------
 
 To update CRM user - issue PATCH request against **/api/sugarcrm-crms/<crm_uuid>/users/<user_id>/**.
 
@@ -238,7 +235,7 @@ Example of a request:
     }
 
 
-Delete CRM user
----------------
+Delete a CRM user
+-----------------
 
 To delete CRM user - issue DELETE request against **/api/sugarcrm-crms/<crm_uuid>/users/<user_id>/**.
