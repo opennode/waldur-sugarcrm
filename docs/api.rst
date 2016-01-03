@@ -82,7 +82,7 @@ where a user has a role.
 
 Create a new SugarCRM resource
 ------------------------------
-CRM - SugarCRM resource. A new CRM can be created by users with project administrator role, customer owner role or with
+A new SugarCRM instance can be created by users with project administrator role, customer owner role or with
 staff privilege (is_staff=True). To create a CRM, client must issue POST request to **/api/sugarcrm-crms/** with
 parameters:
 
@@ -110,11 +110,20 @@ parameters:
         "user_count": 20
     }
 
+Updating a SugarCRM resource
+----------------------------
 
-CRM display
------------
+SugarCRM can be update by issuing PUT request against **/api/sugarcrm-crms/<crm_uuid>/**.
 
-To get CRM data issue GET request against **/api/sugarcrm-crms/<crm_uuid>/**.
+Supported fields for update are **name** and **description**. Quota management for users is performed
+through **/api/quotas/** endpoint by POSTing a new limit for the **user_count** quota with scope
+of the SugarCRM instance.
+
+
+SugarCRM resource display
+-------------------------
+
+To get SugarCRM resource data issue GET request against **/api/sugarcrm-crms/<crm_uuid>/**.
 
 Example rendering of the CRM object:
 
