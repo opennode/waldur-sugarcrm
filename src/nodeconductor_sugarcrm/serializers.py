@@ -65,16 +65,20 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
         model = models.CRM
         view_name = 'sugarcrm-crms-detail'
         fields = structure_serializers.BaseResourceSerializer.Meta.fields + ('api_url', 'user_count', 'quotas')
-        read_only_fields = ('api_url', )
+        read_only_fields = structure_serializers.BaseResourceSerializer.Meta.read_only_fields + ('api_url', )
+        protected_fields = structure_serializers.BaseResourceSerializer.Meta.protected_fields + ('user_count', )
 
     def validate(self, attrs):
-        spl = attrs['service_project_link']
-        quota = spl.quotas.get(name='user_limit_count')
-        delta = attrs.get('user_count', self.DEFAULT_USER_COUNT)
-        if quota.is_exceeded(delta=delta):
-            raise serializers.ValidationError(
-                'Service project link users count quota is over limit (limit: %s, required: %s)' %
-                (quota.limit, quota.usage + delta))
+        if not self.instance:
+            # quota check on creation. update is done through /quotas endpoint
+            spl = attrs['service_project_link']
+            quota = spl.quotas.get(name='user_limit_count')
+            # usage delta for the SPL quota is equal to the limit of the resource
+            delta = attrs.get('user_count', self.DEFAULT_USER_COUNT)
+            if quota.is_exceeded(delta=delta):
+                raise serializers.ValidationError(
+                    'Service project link users count quota is over limit (limit: %s, required: %s)' %
+                    (quota.limit, quota.usage + delta))
         return attrs
 
 
