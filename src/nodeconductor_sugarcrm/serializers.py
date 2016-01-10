@@ -107,10 +107,11 @@ class CRMUserSerializer(serializers.Serializer):
         return reverse('sugarcrm-users-detail', kwargs={'crm_uuid': crm.uuid.hex, 'pk': obj.id}, request=request)
 
     def validate(self, attrs):
-        crm = self.context['crm']
-        user_count_quota = crm.quotas.get(name='user_count')
-        if user_count_quota.is_exceeded(delta=1):
-            raise serializers.ValidationError(
-                'User count quota is over limit (users count: %s, max users count: %s).' %
-                (user_count_quota.usage, user_count_quota.limit))
+        if not self.instance:
+            crm = self.context['crm']
+            user_count_quota = crm.quotas.get(name='user_count')
+            if user_count_quota.is_exceeded(delta=1):
+                raise serializers.ValidationError(
+                    'User count quota is over limit (users count: %s, max users count: %s).' %
+                    (user_count_quota.usage, user_count_quota.limit))
         return attrs
