@@ -10,6 +10,7 @@ class PriceItemTypes(object):
 
 
 class SugarCRMCostTrackingBackend(CostTrackingBackend):
+    NUMERICAL = [PriceItemTypes.USERS]
     USERS_KEY = 'count'
 
     @classmethod
