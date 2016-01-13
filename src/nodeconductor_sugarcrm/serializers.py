@@ -46,7 +46,6 @@ class ServiceProjectLinkSerializer(structure_serializers.BaseServiceProjectLinkS
 
 
 class CRMSerializer(structure_serializers.BaseResourceSerializer):
-    DEFAULT_USER_COUNT = 10
     service = serializers.HyperlinkedRelatedField(
         source='service_project_link.service',
         view_name='sugarcrm-detail',
@@ -58,7 +57,8 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
         queryset=models.SugarCRMServiceProjectLink.objects.all(),
         write_only=True)
 
-    user_count = serializers.IntegerField(min_value=0, default=DEFAULT_USER_COUNT, write_only=True)
+    user_count = serializers.IntegerField(
+        min_value=0, default=models.CRM.Quotas.user_count.default_limit, write_only=True)
     quotas = quotas_serializers.QuotaSerializer(many=True, read_only=True)
 
     class Meta(structure_serializers.BaseResourceSerializer.Meta):
@@ -74,7 +74,7 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
             spl = attrs['service_project_link']
             quota = spl.quotas.get(name='user_limit_count')
             # usage delta for the SPL quota is equal to the limit of the resource
-            delta = attrs.get('user_count', self.DEFAULT_USER_COUNT)
+            delta = attrs['user_count']
             if quota.is_exceeded(delta=delta):
                 raise serializers.ValidationError(
                     'Service project link users count quota is over limit (limit: %s, required: %s)' %
@@ -109,7 +109,7 @@ class CRMUserSerializer(serializers.Serializer):
     def validate(self, attrs):
         if not self.instance:
             crm = self.context['crm']
-            user_count_quota = crm.quotas.get(name='user_count')
+            user_count_quota = crm.quotas.get(name=crm.Quotas.user_count)
             if user_count_quota.is_exceeded(delta=1):
                 raise serializers.ValidationError(
                     'User count quota is over limit (users count: %s, max users count: %s).' %
