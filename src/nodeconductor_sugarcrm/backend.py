@@ -130,7 +130,7 @@ class SugarCRMBackend(SugarCRMBaseBackend):
             return self.session.get_entry('Users', user_id)
 
         def list_users(self, **kwargs):
-            # only active non-admin users should be visible
+            # admin users should be visible
             user_query = sugarcrm.User(is_admin='0')
             users = self.session.get_entry_list(user_query)
             # do not show users that are reserved by sugarcrm:
