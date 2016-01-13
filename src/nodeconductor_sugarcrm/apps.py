@@ -2,7 +2,6 @@ from django.apps import AppConfig
 from django.db.models import signals
 
 from nodeconductor.cost_tracking import CostTrackingRegister
-from nodeconductor.quotas import handlers as quotas_handlers
 from nodeconductor.quotas.models import Quota
 from nodeconductor.structure import SupportedServices
 from nodeconductor.template import TemplateRegistry
@@ -28,7 +27,6 @@ class SugarCRMConfig(AppConfig):
 
         from . import handlers
         CRM = self.get_model('CRM')
-        SugarCRMServiceProjectLink = self.get_model('SugarCRMServiceProjectLink')
 
         signals.post_save.connect(
             handlers.update_user_limit_count_quota_on_crm_quota_change,
@@ -40,10 +38,4 @@ class SugarCRMConfig(AppConfig):
             handlers.update_user_limit_count_quota_on_crm_deletion,
             sender=CRM,
             dispatch_uid='nodeconductor_sugarcrm.handlers.update_user_limit_count_quota_on_crm_deletion'
-        )
-
-        signals.post_save.connect(
-            quotas_handlers.add_quotas_to_scope,
-            sender=SugarCRMServiceProjectLink,
-            dispatch_uid='nodeconductor.structure.handlers.add_quotas_to_sugarcrm_spl',
         )

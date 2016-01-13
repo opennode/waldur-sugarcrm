@@ -26,6 +26,6 @@ class SugarCRMCostTrackingBackend(CostTrackingBackend):
     def get_used_items(cls, resource):
         items = []
         # users
-        user_count_limit = resource.quotas.get(name='user_count').limit
+        user_count_limit = resource.quotas.get(name=resource.Quotas.user_count).limit
         items.append((PriceItemTypes.USERS, cls.USERS_KEY, user_count_limit))
         return items

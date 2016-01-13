@@ -1,5 +1,6 @@
 from django.db import models
 
+from nodeconductor.quotas.fields import QuotaField
 from nodeconductor.quotas.models import QuotaModelMixin
 from nodeconductor.structure import models as structure_models
 
@@ -23,7 +24,8 @@ class SugarCRMService(structure_models.Service):
 class SugarCRMServiceProjectLink(QuotaModelMixin, structure_models.ServiceProjectLink):
     service = models.ForeignKey(SugarCRMService)
 
-    QUOTAS_NAMES = ['user_limit_count']
+    class Quotas(QuotaModelMixin.Quotas):
+        user_limit_count = QuotaField()
 
     class Meta:
         unique_together = ('service', 'project')
@@ -43,7 +45,8 @@ class CRM(QuotaModelMixin, structure_models.Resource, structure_models.PaidResou
     admin_username = models.CharField(max_length=60)
     admin_password = models.CharField(max_length=255)
 
-    QUOTAS_NAMES = ['user_count']
+    class Quotas(QuotaModelMixin.Quotas):
+        user_count = QuotaField(default_limit=10)
 
     class Meta:
         verbose_name = 'CRM'

@@ -8,7 +8,6 @@ import sugarcrm
 
 from nodeconductor.core.tasks import send_task
 from nodeconductor.core.utils import pwgen
-from nodeconductor.quotas.models import Quota
 from nodeconductor.structure import ServiceBackend, ServiceBackendError
 
 
@@ -27,7 +26,7 @@ class SugarCRMBaseBackend(ServiceBackend):
         self.crm = crm
 
     def provision(self, crm, user_count):
-        Quota.objects.create(name='user_count', scope=crm, limit=user_count)
+        crm.set_quota_limit(crm.Quotas.user_count, user_count)
         send_task('sugarcrm', 'provision_crm')(
             crm.uuid.hex,
         )
@@ -107,6 +106,11 @@ class SugarCRMBackend(SugarCRMBaseBackend):
 
     class SugarCRMClient(object):
 
+        class UserStatuses(object):
+            ACTIVE = 'Active'
+            INACTIVE = 'Inactive'
+            RESERVED = 'Reserved'
+
         def __init__(self, url, username, password):
             self.url = url + '/service/v4/rest.php'
             self.session = sugarcrm.Session(self.url, username, password)
@@ -126,9 +130,11 @@ class SugarCRMBackend(SugarCRMBaseBackend):
             return self.session.get_entry('Users', user_id)
 
         def list_users(self, **kwargs):
-            # admin user should not be visible
+            # only active non-admin users should be visible
             user_query = sugarcrm.User(is_admin='0')
             users = self.session.get_entry_list(user_query)
+            # do not show users that are reserved by sugarcrm:
+            users = [user for user in users if user.status != self.UserStatuses.RESERVED]
             # XXX: SugarCRM cannot filter 2 arguments together - its easier to filter users here.
             return [user for user in users if all(getattr(user, k) == v for k, v in kwargs.items())]
 
@@ -230,7 +236,7 @@ class SugarCRMBackend(SugarCRMBaseBackend):
         return details['provisioned_resources']['OpenStack.Instance']
 
     def create_user(self, user_name, password, last_name, **kwargs):
-        encoded_password = md5.new(password).hexdigest()
+        encoded_password = self._encode_password(password)
         try:
             user = self.sugar_client.create_user(
                 user_name=user_name, user_hash=encoded_password, last_name=last_name, **kwargs)
@@ -238,11 +244,13 @@ class SugarCRMBackend(SugarCRMBaseBackend):
             raise SugarCRMBackendError(
                 'Cannot create user %s on CRM "%s". Error: %s' % (user_name, self.crm.name, e))
 
-        self.crm.add_quota_usage('user_count', 1)
+        self.crm.add_quota_usage(self.crm.Quotas.user_count, 1)
         logger.info('Successfully created user "%s" for CRM "%s"', user_name, self.crm.name)
         return user
 
     def update_user(self, user, **kwargs):
+        if 'password' in kwargs:
+            kwargs['user_hash'] = self._encode_password(kwargs.pop('password'))
         try:
             user = self.sugar_client.update_user(user, **kwargs)
         except (requests.exceptions.RequestException, sugarcrm.SugarError) as e:
@@ -252,6 +260,9 @@ class SugarCRMBackend(SugarCRMBaseBackend):
         logger.info('Successfully updated user "%s" for CRM "%s"', user.user_name, self.crm.name)
         return user
 
+    def _encode_password(self, password):
+        return md5.new(password).hexdigest()
+
     def delete_user(self, user):
         try:
             self.sugar_client.delete_user(user)
@@ -259,7 +270,7 @@ class SugarCRMBackend(SugarCRMBaseBackend):
             raise SugarCRMBackendError(
                 'Cannot delete user with id %s from CRM "%s". Error: %s' % (user.id, self.crm.name, e))
 
-        self.crm.add_quota_usage('user_count', -1)
+        self.crm.add_quota_usage(self.crm.Quotas.user_count, -1)
         logger.info('Successfully deleted user with id %s on CRM "%s"', user.id, self.crm.name)
 
     def get_user(self, user_id):
@@ -277,4 +288,5 @@ class SugarCRMBackend(SugarCRMBaseBackend):
 
     def sync_user_quota(self):
         """ Sync CRM quotas with backend """
-        self.crm.set_quota_usage('user_count', len(self.list_users()))
+        active_users = self.list_users(status=self.SugarCRMClient.UserStatuses.ACTIVE)
+        self.crm.set_quota_usage(self.crm.Quotas.user_count, len(active_users))
