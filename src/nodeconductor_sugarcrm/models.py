@@ -25,7 +25,7 @@ class SugarCRMServiceProjectLink(QuotaModelMixin, structure_models.ServiceProjec
     service = models.ForeignKey(SugarCRMService)
 
     class Quotas(QuotaModelMixin.Quotas):
-        user_limit_count = QuotaField()
+        user_limit_count = QuotaField(default_limit=50)
 
     class Meta:
         unique_together = ('service', 'project')
