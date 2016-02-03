@@ -76,12 +76,16 @@ def schedule_crm_instance_deletion(crm_uuid, transition_entity=None):
 def wait_for_crm_instance_state(crm_uuid, state, erred_state='Erred'):
     crm = CRM.objects.get(uuid=crm_uuid)
     backend = crm.get_backend()
-    current_state = backend.get_crm_instance_details(crm)['state']
+    details = backend.get_crm_instance_details(crm)
+    current_state = details['state']
     logger.info('Checking state for CRM "%s" (UUID: %s) instance. Current value: %s.',
                 crm.name, crm.uuid.hex, current_state)
-    if current_state == 'Erred':
-        raise SugarCRMBackendError('CRM "%s" (UUID: %s) instance with UUID %s become erred. Check OpenStack app logs '
-                                   'for more details.' % (crm.name, crm.uuid.hex, crm.backend_id))
+    if current_state == erred_state:
+        message = ('CRM "%s" (UUID: %s) instance with UUID %s become erred. Check OpenStack app logs '
+                   'for more details.' % (crm.name, crm.uuid.hex, details['uuid']))
+        crm.error_message = message
+        crm.save()
+        raise SugarCRMBackendError(message)
     return current_state == state
 
 
@@ -94,8 +98,11 @@ def wait_for_crm_template_group_provision(crm_uuid):
     logger.info('Checking state of CRM "%s" (UUID: %s) provision result. Current state message: %s.',
                 crm.name, crm.uuid.hex, details['state_message'])
     if details['is_erred']:
-        raise SugarCRMBackendError('CRM "%s" (UUID: %s) provision failed. result UUID %s, message %s' % (
-                                   crm.name, crm.uuid.hex, details['uuid'], details['error_message']))
+        message = ('CRM "%s" (UUID: %s) provision failed. result URL %s, message %s' % (
+                   crm.name, crm.uuid.hex, details['url'], details['error_message']))
+        crm.error_message = message
+        crm.save()
+        raise SugarCRMBackendError(message)
     return details['is_finished']
 
 
