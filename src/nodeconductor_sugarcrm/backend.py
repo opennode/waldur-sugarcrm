@@ -112,27 +112,53 @@ class SugarCRMBackend(SugarCRMBaseBackend):
             RESERVED = 'Reserved'
 
         def __init__(self, url, username, password):
-            self.url = url + '/service/v4/rest.php'
-            self.session = sugarcrm.Session(self.url, username, password)
+            self.v4_url = url + '/service/v4/rest.php'
+            self.v10_url = url + '/rest/v10/'
+            self.username = username
+            self.password = password
+            self.v4_session = sugarcrm.Session(self.v4_url, username, password)
+
+        def execute_v10_request(self, method, url, json_data):
+            method = getattr(requests, method.lower())
+            if not hasattr(self, '_v10_headers'):
+                self._v10_headers = self._get_v10_headers()
+            return method(url, json=json_data, headers=self._v10_headers)
+
+        def _get_v10_headers(self):
+            auth_url = self.v10_url + 'oauth2/token/'
+            json_data = {
+                'client_id': 'sugar',
+                'client_secret': '',
+                'grant_type': 'password',
+                'password': self.password,
+                'platform': 'base',
+                'username': self.username,
+            }
+            response = requests.post(auth_url, json=json_data).json()
+            return {'oauth-token': response['access_token']}
 
         def create_user(self, **kwargs):
             user = sugarcrm.User()
             for key, value in kwargs.items():
                 setattr(user, key, value)
-            return self.session.set_entry(user)
+            return self.v4_session.set_entry(user)
 
         def update_user(self, user, **kwargs):
+            # It is possible to update user status only with v10 API
+            if 'status' in kwargs:
+                url = self.v10_url + 'Users/%s/' % user.id
+                self.execute_v10_request('PUT', url, json_data={'status': kwargs['status']})
             for key, value in kwargs.items():
                 setattr(user, key, value)
-            return self.session.set_entry(user)
+            return self.v4_session.set_entry(user)
 
         def get_user(self, user_id):
-            return self.session.get_entry('Users', user_id)
+            return self.v4_session.get_entry('Users', user_id)
 
         def list_users(self, **kwargs):
             # admin users should be visible
             user_query = sugarcrm.User(is_admin='0')
-            users = self.session.get_entry_list(user_query)
+            users = self.v4_session.get_entry_list(user_query)
             # do not show users that are reserved by sugarcrm:
             users = [user for user in users if user.status != self.UserStatuses.RESERVED]
             # XXX: SugarCRM cannot filter 2 arguments together - its easier to filter users here.
@@ -140,7 +166,7 @@ class SugarCRMBackend(SugarCRMBaseBackend):
 
         def delete_user(self, user):
             user.deleted = 1
-            self.session.set_entry(user)
+            self.v4_session.set_entry(user)
 
     def __init__(self, *args, **kwargs):
         super(SugarCRMBackend, self).__init__(*args, **kwargs)
