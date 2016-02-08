@@ -51,7 +51,7 @@ class CRMUserViewSet(viewsets.ViewSet):
         return super(CRMUserViewSet, self).handle_exception(exc)
 
     def get_serializer_context(self):
-        return {'crm': self.crm, 'request': self.request}
+        return {'crm': self.crm, 'request': self.request, 'view': self}
 
     # XXX: This method should be replaced by default filter then CRM users will be moved to separate model
     def get_filtered_users(self, request):

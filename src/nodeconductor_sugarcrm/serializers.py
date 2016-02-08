@@ -1,8 +1,10 @@
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
+from nodeconductor.core import serializers as core_serializers
 from nodeconductor.quotas import serializers as quotas_serializers
 from nodeconductor.structure import serializers as structure_serializers
+
 from . import models, backend
 
 
@@ -82,16 +84,19 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
         return attrs
 
 
-class CRMUserSerializer(serializers.Serializer):
+class CRMUserSerializer(core_serializers.AugmentedSerializerMixin, serializers.Serializer):
 
     url = serializers.SerializerMethodField()
     uuid = serializers.CharField(read_only=True, source='id')
     user_name = serializers.CharField(max_length=60)
     password = serializers.CharField(write_only=True, max_length=255)
-    status = serializers.CharField(read_only=True)
+    status = serializers.CharField(max_length=30, required=False)
     last_name = serializers.CharField(max_length=30)
     first_name = serializers.CharField(max_length=30, required=False)
     email = serializers.CharField(source='email1', max_length=255, required=False)
+
+    class Meta(object):
+        protected_fields = ['user_name']
 
     def get_fields(self):
         fields = super(CRMUserSerializer, self).get_fields()
@@ -105,6 +110,14 @@ class CRMUserSerializer(serializers.Serializer):
         crm = self.context['crm']
         request = self.context['request']
         return reverse('sugarcrm-users-detail', kwargs={'crm_uuid': crm.uuid.hex, 'pk': obj.id}, request=request)
+
+    def validate_user_name(self, value):
+        crm = self.context['crm']
+        users = crm.get_backend().list_users()
+        exist_user_names = [u.user_name for u in users]
+        if value in exist_user_names:
+            raise serializers.ValidationError('User with such name already exists.')
+        return value
 
     def validate(self, attrs):
         if not self.instance:
