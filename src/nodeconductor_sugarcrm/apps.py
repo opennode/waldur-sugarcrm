@@ -25,7 +25,7 @@ class SugarCRMConfig(AppConfig):
         from .template import CRMProvisionTemplateForm
         TemplateRegistry.register(CRMProvisionTemplateForm)
 
-        from . import handlers
+        from . import handlers, signals as sugarcrm_signals
         CRM = self.get_model('CRM')
 
         signals.post_save.connect(
@@ -38,4 +38,16 @@ class SugarCRMConfig(AppConfig):
             handlers.update_user_limit_count_quota_on_crm_deletion,
             sender=CRM,
             dispatch_uid='nodeconductor_sugarcrm.handlers.update_user_limit_count_quota_on_crm_deletion'
+        )
+
+        sugarcrm_signals.user_post_save.connect(
+            handlers.log_user_post_save,
+            sender=CRM,
+            dispatch_uid='nodeconductor_sugarcrm.handlers.log_user_post_save'
+        )
+
+        sugarcrm_signals.user_post_delete.connect(
+            handlers.log_user_post_delete,
+            sender=CRM,
+            dispatch_uid='nodeconductor_sugarcrm.handlers.log_user_post_delete'
         )
