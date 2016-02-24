@@ -23,7 +23,7 @@ class SugarCRMService(structure_models.Service):
         return 'sugarcrm'
 
 
-class SugarCRMServiceProjectLink(QuotaModelMixin, structure_models.ServiceProjectLink):
+class SugarCRMServiceProjectLink(structure_models.ServiceProjectLink):
     service = models.ForeignKey(SugarCRMService)
 
     class Quotas(QuotaModelMixin.Quotas):
