@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from nodeconductor.structure import views as structure_views
 from nodeconductor.structure.managers import filter_queryset_for_user
-from . import models, serializers, backend
+from . import models, serializers, backend, signals
 
 
 class SugarCRMServiceViewSet(structure_views.BaseServiceViewSet):
@@ -76,6 +76,7 @@ class CRMUserViewSet(viewsets.ViewSet):
         if user is None or int(user.is_admin):
             return Response(status=status.HTTP_404_NOT_FOUND)
         self.backend.delete_user(user)
+        signals.user_post_delete(user, self.crm)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def create(self, request, crm_uuid):
@@ -83,6 +84,7 @@ class CRMUserViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         user = self.backend.create_user(status='Active', **serializer.validated_data)
         user_data = serializers.CRMUserSerializer(user, context=self.get_serializer_context()).data
+        signals.user_post_save(user, self.crm, created=True)
         return Response(user_data, status=status.HTTP_201_CREATED)
 
     def update(self, request, crm_uuid, pk=None):
@@ -97,4 +99,5 @@ class CRMUserViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         user = self.backend.update_user(user, **serializer.validated_data)
         user_data = serializers.CRMUserSerializer(user, context=self.get_serializer_context()).data
+        signals.user_post_save(user, self.crm, created=False)
         return Response(user_data, status.HTTP_200_OK)
