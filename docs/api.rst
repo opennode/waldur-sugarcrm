@@ -1,3 +1,11 @@
+SugarCRM service settings
+--------------------------
+
+SugarCRM service settings have additional quotas:
+
+- sugarcrm_user_count - total count of user limits that were connected to SPLs.
+
+
 SugarCRM services list
 ----------------------
 
