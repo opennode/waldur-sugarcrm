@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-from nodeconductor.quotas.fields import QuotaField
+from nodeconductor.quotas.fields import QuotaField, LimitAggregatorQuotaField
 from nodeconductor.quotas.models import QuotaModelMixin
 from nodeconductor.structure import models as structure_models
 
@@ -27,7 +27,11 @@ class SugarCRMServiceProjectLink(structure_models.ServiceProjectLink):
     service = models.ForeignKey(SugarCRMService)
 
     class Quotas(QuotaModelMixin.Quotas):
-        user_limit_count = QuotaField(default_limit=50)
+        user_limit_count = LimitAggregatorQuotaField(
+            default_limit=50,
+            get_children=lambda spl: CRM.objects.filter(service_project_link=spl),
+            child_quota_name='user_count',
+        )
 
     class Meta(structure_models.ServiceProjectLink.Meta):
         verbose_name = 'SugarCRM service project link'
@@ -47,7 +51,7 @@ class CRM(QuotaModelMixin, structure_models.Resource, structure_models.PaidResou
     admin_password = models.CharField(max_length=255)
 
     class Quotas(QuotaModelMixin.Quotas):
-        user_count = QuotaField(default_limit=10)
+        user_count = QuotaField(default_limit=0)
 
     class Meta:
         verbose_name = 'CRM'
