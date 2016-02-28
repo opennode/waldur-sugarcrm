@@ -74,7 +74,7 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
         if not self.instance:
             # quota check on creation. update is done through /quotas endpoint
             spl = attrs['service_project_link']
-            quota = spl.quotas.get(name=models.SugarCRMServiceProjectLink.Quotas.user_count)
+            quota = spl.quotas.get(name=models.SugarCRMServiceProjectLink.Quotas.user_limit_count)
             # usage delta for the SPL quota is equal to the limit of the resource
             delta = attrs['user_count']
             if quota.is_exceeded(delta=delta):
