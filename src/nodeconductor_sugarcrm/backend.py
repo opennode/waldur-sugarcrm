@@ -208,7 +208,7 @@ class SugarCRMBackend(SugarCRMBaseBackend):
         # store template group result as backend_id
         crm.admin_password = admin_password
         crm.admin_username = admin_username
-        crm.backend_id = response.json()['result_url']
+        crm.backend_id = response.json()['url']
         crm.save()
 
         logger.info('Successfully scheduled instance provision for CRM "%s"', crm.name)
