@@ -12,6 +12,8 @@ class SugarCRMUserEventLogger(EventLogger):
             'sugarcrm_user_creation_succeeded',
             'sugarcrm_user_update_succeeded',
             'sugarcrm_user_deletion_succeeded',
+            'sugarcrm_user_activation_succeeded',
+            'sugarcrm_user_deactivation_succeeded',
         )
 
 

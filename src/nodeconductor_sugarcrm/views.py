@@ -1,10 +1,14 @@
+import copy
+
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets, exceptions
 from rest_framework.response import Response
 
 from nodeconductor.structure import views as structure_views
 from nodeconductor.structure.managers import filter_queryset_for_user
-from . import models, serializers, backend, signals
+from . import models, serializers, backend, signals, log
+
+event_logger = log.event_logger
 
 
 class SugarCRMServiceViewSet(structure_views.BaseServiceViewSet):
@@ -84,20 +88,22 @@ class CRMUserViewSet(viewsets.ViewSet):
         serializer.is_valid(raise_exception=True)
         user = self.backend.create_user(status='Active', **serializer.validated_data)
         user_data = serializers.CRMUserSerializer(user, context=self.get_serializer_context()).data
-        signals.user_post_save.send(sender=models.CRM, user=user, crm=self.crm, created=True)
+        signals.user_post_save.send(sender=models.CRM, old_user=None, new_user=user, crm=self.crm, created=True)
         return Response(user_data, status=status.HTTP_201_CREATED)
 
     def update(self, request, crm_uuid, pk=None):
         return self.partial_update(request, crm_uuid, pk=pk)
 
     def partial_update(self, request, crm_uuid, pk=None):
-        user = self.backend.get_user(pk)
-        if user is None or int(user.is_admin):
+        old_user = self.backend.get_user(pk)
+        if old_user is None or int(old_user.is_admin):
             return Response(status=status.HTTP_404_NOT_FOUND)
         serializer = serializers.CRMUserSerializer(
-            data=request.data, instance=user, context=self.get_serializer_context())
+            data=request.data, instance=old_user, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)
-        user = self.backend.update_user(user, **serializer.validated_data)
-        user_data = serializers.CRMUserSerializer(user, context=self.get_serializer_context()).data
-        signals.user_post_save.send(sender=models.CRM, user=user, crm=self.crm, created=False)
+
+        new_user = self.backend.update_user(copy.deepcopy(old_user), **serializer.validated_data)
+        user_data = serializers.CRMUserSerializer(new_user, context=self.get_serializer_context()).data
+        signals.user_post_save.send(
+            sender=models.CRM, old_user=old_user, new_user=new_user, crm=self.crm, created=False)
         return Response(user_data, status.HTTP_200_OK)
