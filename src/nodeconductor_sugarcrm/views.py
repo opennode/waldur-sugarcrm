@@ -91,7 +91,8 @@ class CRMUserViewSet(viewsets.ViewSet):
 
         notify = serializer.validated_data.pop('notify', False)
 
-        data = dict(password=get_random_string(10), **serializer.validated_data)
+        password = get_random_string(10)
+        data = dict(password=password, **serializer.validated_data)
         user = self.backend.create_user(status='Active', **data)
         user_data = serializers.CRMUserSerializer(user, context=self.get_serializer_context()).data
         signals.user_post_save.send(sender=models.CRM, old_user=None, new_user=user, crm=self.crm, created=True)
@@ -99,7 +100,7 @@ class CRMUserViewSet(viewsets.ViewSet):
         if notify:
             utils.sms_user_password(self.crm, user.phone_mobile, serializer.validated_data['password'])
 
-        return Response(user_data, status=status.HTTP_201_CREATED)
+        return Response(dict(password=password, **user_data), status=status.HTTP_201_CREATED)
 
     def update(self, request, crm_uuid, pk=None):
         return self.partial_update(request, crm_uuid, pk=pk)

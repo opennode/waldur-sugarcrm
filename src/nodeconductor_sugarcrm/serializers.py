@@ -94,7 +94,6 @@ class CRMUserSerializer(core_serializers.AugmentedSerializerMixin, serializers.S
     url = serializers.SerializerMethodField()
     uuid = serializers.CharField(read_only=True, source='id')
     user_name = serializers.CharField(max_length=60)
-    password = serializers.CharField(read_only=True, max_length=255)
     status = serializers.CharField(max_length=30, required=False)
     last_name = serializers.CharField(max_length=30)
     first_name = serializers.CharField(max_length=30, required=False)
