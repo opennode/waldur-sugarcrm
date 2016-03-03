@@ -118,8 +118,7 @@ class CRMUserViewSet(viewsets.ViewSet):
             sender=models.CRM, old_user=old_user, new_user=new_user, crm=self.crm, created=False)
         return Response(user_data, status.HTTP_200_OK)
 
-    # XXX: put was added as portal has a temporary bug with widget update
-    @detail_route(methods=['post', 'put'])
+    @detail_route(methods=['post'])
     def password(self, request, crm_uuid, pk=None):
         user = self.backend.get_user(pk)
         serializer = serializers.UserPasswordSerializer(data=request.data, context={'user': user})
@@ -139,4 +138,4 @@ class CRMUserViewSet(viewsets.ViewSet):
                 'crm': self.crm
             })
 
-        return Response(status=status.HTTP_200_OK)
+        return Response({'password': new_password}, status=status.HTTP_200_OK)

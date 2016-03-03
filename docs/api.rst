@@ -281,3 +281,9 @@ Example of a valid request:
     {
         "notify": "true"
     }
+
+Example of response:
+
+    {
+        "password": "uONLv0UjcI"
+    }
