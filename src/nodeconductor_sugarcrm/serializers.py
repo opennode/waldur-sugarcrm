@@ -102,7 +102,7 @@ class CRMUserSerializer(core_serializers.AugmentedSerializerMixin, serializers.S
     notify = serializers.BooleanField(write_only=True, required=False)
 
     class Meta(object):
-        protected_fields = ['user_name']
+        protected_fields = ['user_name', 'notify']
 
     def get_fields(self):
         fields = super(CRMUserSerializer, self).get_fields()
