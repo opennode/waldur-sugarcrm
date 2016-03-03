@@ -91,7 +91,8 @@ class CRMUserViewSet(viewsets.ViewSet):
 
         notify = serializer.validated_data.pop('notify', False)
 
-        user = self.backend.create_user(status='Active', **serializer.validated_data)
+        data = dict(password=get_random_string(10), **serializer.validated_data)
+        user = self.backend.create_user(status='Active', **data)
         user_data = serializers.CRMUserSerializer(user, context=self.get_serializer_context()).data
         signals.user_post_save.send(sender=models.CRM, old_user=None, new_user=user, crm=self.crm, created=True)
 

@@ -24,6 +24,9 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
                      'Word {password} will be replaced with auto-generated admin password. '
                      ' (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}]")',
         'protocol': 'CRMs access protocol. (default: "http")',
+        'phone_regex': 'RegEx for phone validation',
+        'sms_email_from': 'Name of SMS email sender (SMS will not be send without this parameter).',
+        'sms_email_rcpt': 'Name of SMS email recipient (SMS will not be send without this parameter)',
     }
 
     class Meta(structure_serializers.BaseServiceSerializer.Meta):
@@ -91,7 +94,7 @@ class CRMUserSerializer(core_serializers.AugmentedSerializerMixin, serializers.S
     url = serializers.SerializerMethodField()
     uuid = serializers.CharField(read_only=True, source='id')
     user_name = serializers.CharField(max_length=60)
-    password = serializers.CharField(write_only=True, max_length=255)
+    password = serializers.CharField(read_only=True, max_length=255)
     status = serializers.CharField(max_length=30, required=False)
     last_name = serializers.CharField(max_length=30)
     first_name = serializers.CharField(max_length=30, required=False)

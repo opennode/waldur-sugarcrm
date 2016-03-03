@@ -35,6 +35,9 @@ The following rules for generation of the service settings are used:
                Word {password} will be replaced with auto-generated admin password
                (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}]");
  - protocol - CRMs access protocol. (default: "http");
+ - phone_regex - RegEx for phone validation;
+ - sms_email_from - Name of SMS email sender (SMS will not be send without this parameter);
+ - sms_email_rcpt - Name of SMS email recipient (SMS will not be send without this parameter);
 
 
 Example of a request:
@@ -206,7 +209,6 @@ To create new CRM user - issue POST request against **/api/sugarcrm-crms/<crm_uu
 Request parameters:
 
  - user_name - new user username;
- - password - new user password;
  - last_name - new user last name;
  - first_name - new user first name (can be empty);
  - email - new user email (can be empty);
@@ -227,7 +229,6 @@ Example of a request:
 
     {
         "user_name": "test_user",
-        "password": "test_user",
         "last_name": "test user last name"
     }
 
