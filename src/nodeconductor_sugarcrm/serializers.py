@@ -1,3 +1,5 @@
+import re
+
 from rest_framework import serializers
 from rest_framework.reverse import reverse
 
@@ -94,6 +96,8 @@ class CRMUserSerializer(core_serializers.AugmentedSerializerMixin, serializers.S
     last_name = serializers.CharField(max_length=30)
     first_name = serializers.CharField(max_length=30, required=False)
     email = serializers.CharField(source='email1', max_length=255, required=False)
+    phone = serializers.CharField(source='phone_mobile', max_length=30, required=False)
+    notify = serializers.BooleanField(write_only=True, required=False)
 
     class Meta(object):
         protected_fields = ['user_name']
@@ -120,6 +124,7 @@ class CRMUserSerializer(core_serializers.AugmentedSerializerMixin, serializers.S
         return value
 
     def validate(self, attrs):
+        attrs = super(CRMUserSerializer, self).validate(attrs)
         if not self.instance:
             crm = self.context['crm']
             user_count_quota = crm.quotas.get(name=crm.Quotas.user_count)
@@ -127,4 +132,29 @@ class CRMUserSerializer(core_serializers.AugmentedSerializerMixin, serializers.S
                 raise serializers.ValidationError(
                     'User count quota is over limit (users count: %s, max users count: %s).' %
                     (user_count_quota.usage, user_count_quota.limit))
+
+        crm = self.context['crm']
+        phone = attrs.get('phone_mobile')
+        if phone:
+            options = crm.service_project_link.service.settings.options or {}
+            phone_regex = options.get('phone_regex')
+            if phone_regex and not re.search(phone_regex, phone):
+                raise serializers.ValidationError({'phone': "Invalid phone number."})
+
+        if attrs.get('notify', False) and not phone:
+            raise serializers.ValidationError({'phone': "Missed phone number for notification."})
+
+        return attrs
+
+
+class UserPasswordSerializer(serializers.Serializer):
+    notify = serializers.BooleanField(required=False)
+
+    def validate(self, attrs):
+        attrs = super(UserPasswordSerializer, self).validate(attrs)
+        user = self.context['user']
+
+        if attrs.get('notify', False) and not user.phone_mobile:
+            raise serializers.ValidationError('User must have phone number for sending notifications.')
+
         return attrs

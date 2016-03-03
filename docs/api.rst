@@ -210,6 +210,8 @@ Request parameters:
  - last_name - new user last name;
  - first_name - new user first name (can be empty);
  - email - new user email (can be empty);
+ - phone - new user mobile phone number (can be empty);
+ - status - new user status (can be empty);
 
 
 Example of a request:
@@ -256,3 +258,25 @@ Delete a CRM user
 -----------------
 
 To delete CRM user - issue DELETE request against **/api/sugarcrm-crms/<crm_uuid>/users/<user_id>/**.
+
+
+Reset user password
+-------------------
+
+To reset user password - issue POST request against **/api/sugarcrm-crms/<crm_uuid>/users/<user_id>/password/**.
+You can specify `notify` parameter in order to send user notification about newly created password.
+
+
+Example of a valid request:
+
+.. code-block:: http
+
+    POST /api/sugarcrm-crms/db82a52368ba4957ac2cdb6a37d22dee/users/cc420109-a419-3d5b-558b-5671/password/ HTTP/1.1
+    Content-Type: application/json
+    Accept: application/json
+    Authorization: Token c84d653b9ec92c6cbac41c706593e66f567a7fa4
+    Host: example.com
+
+    {
+        "notify": "true"
+    }

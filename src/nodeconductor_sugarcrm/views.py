@@ -1,12 +1,14 @@
 import copy
 
 from django.shortcuts import get_object_or_404
+from django.utils.crypto import get_random_string
 from rest_framework import status, viewsets, exceptions
+from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
 from nodeconductor.structure import views as structure_views
 from nodeconductor.structure.managers import filter_queryset_for_user
-from . import models, serializers, backend, signals, log
+from . import models, serializers, backend, signals, utils, log
 
 event_logger = log.event_logger
 
@@ -86,9 +88,16 @@ class CRMUserViewSet(viewsets.ViewSet):
     def create(self, request, crm_uuid):
         serializer = serializers.CRMUserSerializer(data=request.data, context=self.get_serializer_context())
         serializer.is_valid(raise_exception=True)
+
+        notify = serializer.validated_data.pop('notify', False)
+
         user = self.backend.create_user(status='Active', **serializer.validated_data)
         user_data = serializers.CRMUserSerializer(user, context=self.get_serializer_context()).data
         signals.user_post_save.send(sender=models.CRM, old_user=None, new_user=user, crm=self.crm, created=True)
+
+        if notify:
+            utils.sms_user_password(self.crm, user.phone_mobile, serializer.validated_data['password'])
+
         return Response(user_data, status=status.HTTP_201_CREATED)
 
     def update(self, request, crm_uuid, pk=None):
@@ -107,3 +116,26 @@ class CRMUserViewSet(viewsets.ViewSet):
         signals.user_post_save.send(
             sender=models.CRM, old_user=old_user, new_user=new_user, crm=self.crm, created=False)
         return Response(user_data, status.HTTP_200_OK)
+
+    # XXX: put was added as portal has a temporary bug with widget update
+    @detail_route(methods=['post', 'put'])
+    def password(self, request, crm_uuid, pk=None):
+        user = self.backend.get_user(pk)
+        serializer = serializers.UserPasswordSerializer(data=request.data, context={'user': user})
+        serializer.is_valid(raise_exception=True)
+
+        new_password = get_random_string(length=10)
+        self.backend.update_user(user, kwargs={'password': new_password})
+
+        if serializer.validated_data.get('notify'):
+            utils.sms_user_password(self.crm, user.phone_mobile, new_password)
+
+        event_logger.sugarcrm_user.info(
+            'SugarCRM user {user_name} password has been reset.',
+            event_type='sugarcrm_user_password_reset',
+            event_context={
+                'user_name': user.user_name,
+                'crm': self.crm
+            })
+
+        return Response(status=status.HTTP_200_OK)
