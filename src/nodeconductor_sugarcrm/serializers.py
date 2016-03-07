@@ -98,7 +98,7 @@ class CRMUserSerializer(core_serializers.AugmentedSerializerMixin, serializers.S
     last_name = serializers.CharField(max_length=30)
     first_name = serializers.CharField(max_length=30, required=False)
     email = serializers.CharField(source='email1', max_length=255, required=False)
-    phone = serializers.CharField(source='phone_mobile', max_length=30, required=False)
+    phone = serializers.CharField(source='phone_mobile', max_length=30, required=False, allow_blank=True)
     notify = serializers.BooleanField(write_only=True, required=False)
 
     class Meta(object):
