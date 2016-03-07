@@ -98,7 +98,7 @@ class CRMUserViewSet(viewsets.ViewSet):
         signals.user_post_save.send(sender=models.CRM, old_user=None, new_user=user, crm=self.crm, created=True)
 
         if notify:
-            utils.sms_user_password(self.crm, user.phone_mobile, serializer.validated_data['password'])
+            utils.sms_user_password(self.crm, user.phone_mobile, password)
 
         return Response(dict(password=password, **user_data), status=status.HTTP_201_CREATED)
 
@@ -125,11 +125,11 @@ class CRMUserViewSet(viewsets.ViewSet):
         serializer = serializers.UserPasswordSerializer(data=request.data, context={'user': user})
         serializer.is_valid(raise_exception=True)
 
-        new_password = get_random_string(length=10)
-        self.backend.update_user(user, kwargs={'password': new_password})
+        password = get_random_string(length=10)
+        self.backend.update_user(user, password=password)
 
         if serializer.validated_data.get('notify'):
-            utils.sms_user_password(self.crm, user.phone_mobile, new_password)
+            utils.sms_user_password(self.crm, user.phone_mobile, password)
 
         event_logger.sugarcrm_user.info(
             'SugarCRM user {user_name} password has been reset.',
@@ -139,4 +139,4 @@ class CRMUserViewSet(viewsets.ViewSet):
                 'crm': self.crm
             })
 
-        return Response({'password': new_password}, status=status.HTTP_200_OK)
+        return Response({'password': password}, status=status.HTTP_200_OK)

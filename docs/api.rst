@@ -91,6 +91,13 @@ To get a list of connections between a project and an oracle service, run GET ag
 where a user has a role.
 
 
+Service-project-link quotas
+---------------------------
+
+ - user_limit_count - limitation for total number of users in all CRMs.
+ - crm_count - CRMs count.
+
+
 Create a new SugarCRM resource
 ------------------------------
 A new SugarCRM instance can be created by users with project administrator role, customer owner role or with
