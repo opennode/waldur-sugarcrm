@@ -71,9 +71,17 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
     class Meta(structure_serializers.BaseResourceSerializer.Meta):
         model = models.CRM
         view_name = 'sugarcrm-crms-detail'
-        fields = structure_serializers.BaseResourceSerializer.Meta.fields + ('api_url', 'user_count', 'quotas')
-        read_only_fields = structure_serializers.BaseResourceSerializer.Meta.read_only_fields + ('api_url', )
+        fields = structure_serializers.BaseResourceSerializer.Meta.fields + (
+            'api_url', 'user_count', 'quotas', 'instance_url')
+        read_only_fields = structure_serializers.BaseResourceSerializer.Meta.read_only_fields + (
+            'api_url', 'instance_url')
         protected_fields = structure_serializers.BaseResourceSerializer.Meta.protected_fields + ('user_count', )
+
+    def get_fields(self):
+        fields = super(CRMSerializer, self).get_fields()
+        if not self.context['request'].user.is_staff:
+            del fields['instance_url']
+        return fields
 
     def validate(self, attrs):
         if not self.instance:
