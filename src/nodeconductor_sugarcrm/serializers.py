@@ -79,7 +79,7 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
 
     def get_fields(self):
         fields = super(CRMSerializer, self).get_fields()
-        if not self.context['request'].user.is_staff:
+        if 'request' in self.context and not self.context['request'].user.is_staff:
             del fields['instance_url']
         return fields
 
