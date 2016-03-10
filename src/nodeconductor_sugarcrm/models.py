@@ -67,5 +67,9 @@ class CRM(QuotaModelMixin, structure_models.Resource, structure_models.PaidResou
     def get_url_name(cls):
         return 'sugarcrm-crms'
 
+    @property
+    def full_name(self):
+        return 'SugarCRM Instance %s' % self.name
+
     def get_backend(self):
         return SugarCRMBackend(settings=self.service_project_link.service.settings, crm=self)
