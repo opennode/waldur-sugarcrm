@@ -209,13 +209,13 @@ class SugarCRMBackend(SugarCRMBaseBackend):
         crm.admin_password = admin_password
         crm.admin_username = admin_username
         crm.backend_id = response.json()['url']
+        crm.instance_url = response.json()['provisioned_resources']['OpenStack.Instance']
         crm.save()
 
         logger.info('Successfully scheduled instance provision for CRM "%s"', crm.name)
 
     def schedule_crm_instance_stopping(self, crm):
-        instance_url = self.get_crm_instance_url(crm)
-        response = self.nc_client.post(instance_url + 'stop/')
+        response = self.nc_client.post(crm.instance_url + 'stop/')
         if not response.ok:
             raise SugarCRMBackendError(
                 'Cannot stop OpenStack instance for CRM "%s": response code - %s, response content: %s.'
@@ -225,8 +225,7 @@ class SugarCRMBackend(SugarCRMBaseBackend):
         logger.info('Successfully scheduled instance stopping for CRM "%s"', crm.name)
 
     def schedule_crm_instance_deletion(self, crm):
-        instance_url = self.get_crm_instance_url(crm)
-        response = self.nc_client.delete(instance_url)
+        response = self.nc_client.delete(crm.instance_url)
         if not response.ok:
             raise SugarCRMBackendError(
                 'Cannot delete OpenStack instance for CRM "%s": response code - %s, response content: %s.'
@@ -237,8 +236,7 @@ class SugarCRMBackend(SugarCRMBaseBackend):
 
     def get_crm_instance_details(self, crm):
         """ Get details of instance that corresponds given CRM """
-        instance_url = self.get_crm_instance_url(crm)
-        response = self.nc_client.get(instance_url)
+        response = self.nc_client.get(crm.instance_url)
         if not response.ok:
             raise SugarCRMBackendError(
                 'Cannot get details of CRMs instance: response code - %s, response content: %s.'
@@ -256,10 +254,6 @@ class SugarCRMBackend(SugarCRMBaseBackend):
                 'Cannot get CRMs provision result details: response code - %s, response content: %s.'
                 'Request URL: %s' % (response.status_code, response.content, response.request.url))
         return response.json()
-
-    def get_crm_instance_url(self, crm):
-        details = self.get_crm_template_group_result_details(crm)
-        return details['provisioned_resources']['OpenStack.Instance']
 
     def create_user(self, user_name, password, last_name, **kwargs):
         encoded_password = self._encode_password(password)

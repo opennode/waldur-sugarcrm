@@ -51,9 +51,10 @@ class CRM(QuotaModelMixin, structure_models.Resource, structure_models.PaidResou
     service_project_link = models.ForeignKey(
         SugarCRMServiceProjectLink, related_name='crms', on_delete=models.PROTECT)
 
-    api_url = models.CharField(max_length=127, help_text='CRMs OpenStack instance URL')
+    api_url = models.CharField(max_length=127, help_text='CRMs OpenStack instance access URL.')
     admin_username = models.CharField(max_length=60)
     admin_password = models.CharField(max_length=255)
+    instance_url = models.URLField(blank=True, help_text='CRMs OpenStack instance URL in NC.')
 
     class Quotas(QuotaModelMixin.Quotas):
         user_count = QuotaField(default_limit=0)
