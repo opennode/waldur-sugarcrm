@@ -169,7 +169,7 @@ Example rendering of the CRM object:
             "resource_type": "SugarCRM.CRM",
             "state": "Provisioning",
             "created": "2015-10-20T10:35:19.146Z",
-            "isntance_url": "http://example.com/api/openstack-instances/42c35f288c524d52b86d945adde91db2/"
+            "instance_url": "http://example.com/api/openstack-instances/42c35f288c524d52b86d945adde91db2/"
             "api_url": "http://example.com"
         }
     ]
