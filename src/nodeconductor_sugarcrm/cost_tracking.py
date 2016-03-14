@@ -1,31 +1,33 @@
 from django.contrib.contenttypes.models import ContentType
 
-from . import models
 from nodeconductor.cost_tracking import CostTrackingBackend
 from nodeconductor.cost_tracking.models import DefaultPriceListItem
 
-
-class PriceItemTypes(object):
-    USERS = 'users'
+from .models import CRM
 
 
-class SugarCRMCostTrackingBackend(CostTrackingBackend):
-    NUMERICAL = [PriceItemTypes.USERS]
-    USERS_KEY = 'count'
+USERS = 'users'
+USERS_KEY = 'count'
+SUPPORT = 'support'
+SUPPORT_KEY = 'premium'
+
+
+class SaltStackCostTrackingBackend(CostTrackingBackend):
+    NUMERICAL = [USERS]
 
     @classmethod
     def get_default_price_list_items(cls):
-        crm_content_type = ContentType.objects.get_for_model(models.CRM)
-        items = []
-        # users
-        items.append(DefaultPriceListItem(
-            item_type=PriceItemTypes.USERS, key=cls.USERS_KEY, resource_content_type=crm_content_type))
-        return items
+        content_type = ContentType.objects.get_for_model(CRM)
+
+        yield DefaultPriceListItem(
+            item_type=USERS, key=USERS_KEY,
+            resource_content_type=content_type)
+
+        yield DefaultPriceListItem(
+            item_type=SUPPORT, key=SUPPORT_KEY,
+            resource_content_type=content_type)
 
     @classmethod
     def get_used_items(cls, resource):
-        items = []
-        # users
-        user_count_limit = resource.quotas.get(name=resource.Quotas.user_count).limit
-        items.append((PriceItemTypes.USERS, cls.USERS_KEY, user_count_limit))
-        return items
+        user_count = resource.quotas.get(name=resource.Quotas.user_count).limit
+        return [(USERS, USERS_KEY, user_count)]
