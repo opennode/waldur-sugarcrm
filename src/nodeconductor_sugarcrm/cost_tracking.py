@@ -12,7 +12,7 @@ SUPPORT = 'support'
 SUPPORT_KEY = 'premium'
 
 
-class SaltStackCostTrackingBackend(CostTrackingBackend):
+class SugarCRMCostTrackingBackend(CostTrackingBackend):
     NUMERICAL = [USERS]
 
     @classmethod
