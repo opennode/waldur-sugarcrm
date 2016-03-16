@@ -47,7 +47,7 @@ class SugarCRMServiceProjectLink(structure_models.ServiceProjectLink):
         return 'sugarcrm-spl'
 
 
-class CRM(QuotaModelMixin, structure_models.SaaSResource, structure_models.PaidResource):
+class CRM(QuotaModelMixin, structure_models.PublishableResource, structure_models.PaidResource):
     service_project_link = models.ForeignKey(
         SugarCRMServiceProjectLink, related_name='crms', on_delete=models.PROTECT)
 
