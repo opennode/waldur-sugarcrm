@@ -6,7 +6,7 @@ from nodeconductor.quotas.admin import QuotaInline
 from nodeconductor.structure import admin as structure_admin
 
 
-class CRMAdmin(structure_admin.ResourceAdmin):
+class CRMAdmin(structure_admin.PublishableResourceAdmin):
     actions = ['sync_quotas']
     inlines = [QuotaInline]
 

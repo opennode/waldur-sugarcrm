@@ -41,7 +41,7 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
 
 
 class ServiceProjectLinkSerializer(structure_serializers.BaseServiceProjectLinkSerializer):
-    quotas = quotas_serializers.QuotaSerializer(many=True, read_only=True)
+    quotas = quotas_serializers.BasicQuotaSerializer(many=True, read_only=True)
 
     class Meta(structure_serializers.BaseServiceProjectLinkSerializer.Meta):
         model = models.SugarCRMServiceProjectLink
@@ -52,7 +52,7 @@ class ServiceProjectLinkSerializer(structure_serializers.BaseServiceProjectLinkS
         fields = structure_serializers.BaseServiceProjectLinkSerializer.Meta.fields + ('quotas',)
 
 
-class CRMSerializer(structure_serializers.BaseResourceSerializer):
+class CRMSerializer(structure_serializers.PublishableResourceSerializer):
     service = serializers.HyperlinkedRelatedField(
         source='service_project_link.service',
         view_name='sugarcrm-detail',
@@ -66,16 +66,16 @@ class CRMSerializer(structure_serializers.BaseResourceSerializer):
 
     user_count = serializers.IntegerField(
         min_value=0, default=models.CRM.Quotas.user_count.default_limit, write_only=True)
-    quotas = quotas_serializers.QuotaSerializer(many=True, read_only=True)
+    quotas = quotas_serializers.BasicQuotaSerializer(many=True, read_only=True)
 
-    class Meta(structure_serializers.BaseResourceSerializer.Meta):
+    class Meta(structure_serializers.PublishableResourceSerializer.Meta):
         model = models.CRM
         view_name = 'sugarcrm-crms-detail'
-        fields = structure_serializers.BaseResourceSerializer.Meta.fields + (
+        fields = structure_serializers.PublishableResourceSerializer.Meta.fields + (
             'api_url', 'user_count', 'quotas', 'instance_url')
-        read_only_fields = structure_serializers.BaseResourceSerializer.Meta.read_only_fields + (
+        read_only_fields = structure_serializers.PublishableResourceSerializer.Meta.read_only_fields + (
             'api_url', 'instance_url')
-        protected_fields = structure_serializers.BaseResourceSerializer.Meta.protected_fields + ('user_count', )
+        protected_fields = structure_serializers.PublishableResourceSerializer.Meta.protected_fields + ('user_count', )
 
     def get_fields(self):
         fields = super(CRMSerializer, self).get_fields()
