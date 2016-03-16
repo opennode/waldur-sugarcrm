@@ -169,8 +169,18 @@ Example rendering of the CRM object:
             "resource_type": "SugarCRM.CRM",
             "state": "Provisioning",
             "created": "2015-10-20T10:35:19.146Z",
-            "instance_url": "http://example.com/api/openstack-instances/42c35f288c524d52b86d945adde91db2/"
-            "api_url": "http://example.com"
+            "instance_url": "http://example.com/api/openstack-instances/42c35f288c524d52b86d945adde91db2/",
+            "api_url": "http://example.com",
+            "publishing_state": "not published",
+            "quotas": [
+                {
+                    "url": "http://example.com/api/quotas/224c771110cc4340aa6a18f58861b307/",
+                    "uuid": "224c771110cc4340aa6a18f58861b307",
+                    "name": "user_count",
+                    "limit": 10.0,
+                    "usage": 0.0,
+                }
+            ]
         }
     ]
 
