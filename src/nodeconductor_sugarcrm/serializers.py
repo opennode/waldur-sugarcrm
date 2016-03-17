@@ -80,7 +80,7 @@ class CRMSerializer(structure_serializers.PublishableResourceSerializer):
     def get_fields(self):
         fields = super(CRMSerializer, self).get_fields()
         if 'request' in self.context and not self.context['request'].user.is_staff:
-            del fields['instance_url']
+            fields.pop('instance_url', None)
         return fields
 
     def validate(self, attrs):
