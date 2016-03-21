@@ -156,9 +156,14 @@ class SugarCRMBackend(SugarCRMBaseBackend):
             return self.v4_session.get_entry('Users', user_id)
 
         def list_users(self, **kwargs):
-            # admin users should be visible
+            # admin users should not be visible
             user_query = sugarcrm.User(is_admin='0')
-            users = self.v4_session.get_entry_list(user_query)
+            user_count = self.v4_session.get_entries_count(user_query)
+
+            step = 100
+            users = []
+            for offset in range(0, user_count, step):
+                users += self.v4_session.get_entry_list(user_query, max_results=step, offset=offset)
             # do not show users that are reserved by sugarcrm:
             users = [user for user in users if user.status != self.UserStatuses.RESERVED]
             # XXX: SugarCRM cannot filter 2 arguments together - its easier to filter users here.
