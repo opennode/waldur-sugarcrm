@@ -61,8 +61,7 @@ class CRMSerializer(structure_serializers.PublishableResourceSerializer):
 
     service_project_link = serializers.HyperlinkedRelatedField(
         view_name='sugarcrm-spl-detail',
-        queryset=models.SugarCRMServiceProjectLink.objects.all(),
-        write_only=True)
+        queryset=models.SugarCRMServiceProjectLink.objects.all())
 
     user_count = serializers.IntegerField(
         min_value=0, default=models.CRM.Quotas.user_count.default_limit, write_only=True)
