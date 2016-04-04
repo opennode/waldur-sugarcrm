@@ -1,10 +1,5 @@
 from django.apps import AppConfig
 
-from nodeconductor.cost_tracking import CostTrackingRegister
-from nodeconductor.quotas.fields import LimitAggregatorQuotaField
-from nodeconductor.structure import SupportedServices
-from nodeconductor.template import TemplateRegistry
-
 
 class SugarCRMConfig(AppConfig):
     name = 'nodeconductor_sugarcrm'
@@ -12,6 +7,11 @@ class SugarCRMConfig(AppConfig):
     service_name = 'SugarCRM'
 
     def ready(self):
+        from nodeconductor.cost_tracking import CostTrackingRegister
+        from nodeconductor.quotas.fields import LimitAggregatorQuotaField
+        from nodeconductor.structure import SupportedServices
+        from nodeconductor.template import TemplateRegistry
+
         # structure
         from .backend import SugarCRMBackend
         SupportedServices.register_backend(SugarCRMBackend)
