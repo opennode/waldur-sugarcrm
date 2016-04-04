@@ -16,7 +16,7 @@ tests_require = [
 ]
 
 install_requires = [
-    'nodeconductor>0.90.0',
+    'nodeconductor>0.91.0',
     'sugarcrm>=0.1.1',
 ]
 
