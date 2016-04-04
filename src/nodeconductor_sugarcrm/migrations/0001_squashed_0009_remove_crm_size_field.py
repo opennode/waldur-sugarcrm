@@ -7,7 +7,7 @@ import django_fsm
 import nodeconductor.core.models
 import django.db.models.deletion
 import django.utils.timezone
-import nodeconductor.logging.log
+import nodeconductor.logging.loggers
 import uuidfield.fields
 import django.core.validators
 import model_utils.fields
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
                 'verbose_name': 'SugarCRM service',
                 'verbose_name_plural': 'SugarCRM services',
             },
-            bases=(nodeconductor.core.models.SerializableAbstractMixin, nodeconductor.logging.log.LoggableMixin, models.Model),
+            bases=(nodeconductor.core.models.SerializableAbstractMixin, nodeconductor.logging.loggers.LoggableMixin, models.Model),
         ),
         migrations.CreateModel(
             name='SugarCRMServiceProjectLink',
@@ -51,7 +51,7 @@ class Migration(migrations.Migration):
                 ('service', models.ForeignKey(to='nodeconductor_sugarcrm.SugarCRMService')),
                 ('error_message', models.TextField(blank=True)),
             ],
-            bases=(nodeconductor.core.models.SerializableAbstractMixin, nodeconductor.logging.log.LoggableMixin, models.Model),
+            bases=(nodeconductor.core.models.SerializableAbstractMixin, nodeconductor.logging.loggers.LoggableMixin, models.Model),
             options={
                 'verbose_name': 'SugarCRM service project link',
                 'verbose_name_plural': 'SugarCRM service project links',
@@ -96,6 +96,6 @@ class Migration(migrations.Migration):
                 'verbose_name': 'CRM',
                 'verbose_name_plural': 'CRMs',
             },
-            bases=(nodeconductor.core.models.SerializableAbstractMixin, nodeconductor.logging.log.LoggableMixin, models.Model),
+            bases=(nodeconductor.core.models.SerializableAbstractMixin, nodeconductor.logging.loggers.LoggableMixin, models.Model),
         ),
     ]
