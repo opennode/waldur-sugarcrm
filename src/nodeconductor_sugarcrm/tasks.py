@@ -2,10 +2,11 @@ import logging
 import sys
 
 from celery import shared_task, chain
-from django.utils import six
-from django.utils import timezone
+from django.utils import six, timezone
 
-from nodeconductor.core.tasks import save_error_message, transition, retry_if_false
+from nodeconductor.core import utils as core_utils
+from nodeconductor.core.tasks import save_error_message, transition, retry_if_false, BackendMethodTask
+
 from .backend import SugarCRMBackendError
 from .models import CRM
 
@@ -196,3 +197,10 @@ def sync_crm_quotas(crm_uuid):
     crm = CRM.objects.get(uuid=crm_uuid)
     backend = crm.get_backend()
     backend.sync_user_quota()
+
+
+@shared_task(name='nodeconductor.sugarcrm.pull_sla')
+def pull_sla():
+    """ Copy OpenStack instance SLA and events as CRM events """
+    for crm in CRM.objects.filter(state=CRM.States.ONLINE):
+        BackendMethodTask().delay(core_utils.serialize_instance(crm), 'pull_crm_sla')

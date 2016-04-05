@@ -21,4 +21,8 @@ class SugarCRMExtension(NodeConductorExtension):
                 'schedule': timedelta(days=1),
                 'args': ()
             },
+            'sugarcrm-pull-sla': {
+                'task': 'nodeconductor.sugarcrm.pull_sla',
+                'schedule': timedelta(minutes=5),
+            },
         }
