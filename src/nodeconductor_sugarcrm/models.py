@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
+from nodeconductor.core import utils as core_utils
 from nodeconductor.quotas.fields import QuotaField, LimitAggregatorQuotaField, CounterQuotaField
 from nodeconductor.quotas.models import QuotaModelMixin
 from nodeconductor.structure import models as structure_models
@@ -73,3 +74,7 @@ class CRM(QuotaModelMixin, structure_models.PublishableResource, structure_model
 
     def get_backend(self):
         return SugarCRMBackend(settings=self.service_project_link.service.settings, crm=self)
+
+    def get_instance(self):
+        """ Restore instance from URL """
+        return core_utils.instance_from_url(self.instance_url)

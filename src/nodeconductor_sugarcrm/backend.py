@@ -2,6 +2,9 @@ import logging
 import md5
 import urlparse
 
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.urlresolvers import Resolver404
+from django.utils import six
 import requests
 from rest_framework.reverse import reverse
 import sugarcrm
@@ -238,6 +241,31 @@ class SugarCRMBackend(SugarCRMBaseBackend):
                 (crm.name, response.status_code, response.content, response.request.url, response.request.body))
 
         logger.info('Successfully scheduled instance deletion for CRM "%s"', crm.name)
+
+    def pull_crm_sla(self, crm):
+        """ Copy OpenStack instance SLA and events as CRM events """
+        try:
+            instance = crm.get_instance()
+        except (Resolver404, ObjectDoesNotExist) as e:
+            crm.error_message = 'Cannot get instance for CRM %s (PK: %s). Error: %s' % (crm.name, crm.pk, e)
+            crm.set_erred()
+            crm.save()
+            logger.error(crm.error_message)
+            six.reraise(SugarCRMBackendError, e)
+        else:
+            for item in instance.sla_items.all():
+                crm.sla_items.update_or_create(
+                    period=item.period,
+                    defaults={'value': item.value, 'agreed_value': item.agreed_value},
+                )
+            for state_transition in instance.state_items.all():
+                crm.state_items.update_or_create(
+                    period=state_transition.period,
+                    timestamp=state_transition.timestamp,
+                    defaults={'state': state_transition.state},
+                )
+
+        logger.info('Successfully pulled SLA for CRM "%s"', crm.name)
 
     def get_crm_instance_details(self, crm):
         """ Get details of instance that corresponds given CRM """
