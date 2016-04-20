@@ -23,5 +23,6 @@ TEST-*.xml
 
 # documentation
 docs/_build/
+docs/drfapi/
 
 /static_files
