@@ -258,3 +258,15 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'nodeconductor.server.test_settings'
+from django.conf import settings
+settings.INSTALLED_APPS = [app for app in settings.INSTALLED_APPS if not app.endswith('tests')]
+settings.BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
+from django.core.wsgi import get_wsgi_application
+get_wsgi_application()
+
+from nodeconductor.core.management.commands.drfdocs import Command
+Command().handle('nodeconductor_sugarcrm', path='docs/drfapi')
+
