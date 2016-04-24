@@ -3,13 +3,13 @@ from django import forms
 from rest_framework import serializers
 
 from nodeconductor.structure import models as structure_models
-from nodeconductor.template.forms import TemplateForm
-from nodeconductor.template.serializers import BaseTemplateSerializer
+from nodeconductor.template.forms import ResourceTemplateForm
+from nodeconductor.template.serializers import BaseResourceTemplateSerializer
 from nodeconductor_sugarcrm import models
 
 
 # TODO: Filter service settings of defined type
-class CRMProvisionTemplateForm(TemplateForm):
+class CRMProvisionTemplateForm(ResourceTemplateForm):
     service_settings = forms.ModelChoiceField(
         label="SugarCRM service settings",
         queryset=structure_models.ServiceSettings.objects.all(),
@@ -17,10 +17,10 @@ class CRMProvisionTemplateForm(TemplateForm):
 
     user_count = forms.IntegerField(required=False)
 
-    class Meta(TemplateForm.Meta):
-        fields = TemplateForm.Meta.fields + ('service_settings', 'user_count')
+    class Meta(ResourceTemplateForm.Meta):
+        fields = ResourceTemplateForm.Meta.fields + ('service_settings', 'user_count')
 
-    class Serializer(BaseTemplateSerializer):
+    class Serializer(BaseResourceTemplateSerializer):
         service_settings = serializers.HyperlinkedRelatedField(
             view_name='servicesettings-detail',
             queryset=structure_models.ServiceSettings.objects.all(),
@@ -34,5 +34,5 @@ class CRMProvisionTemplateForm(TemplateForm):
         return cls.Serializer
 
     @classmethod
-    def get_resource_model(cls):
+    def get_model(cls):
         return models.CRM
