@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 
 from ...models import CRM
-from nodeconductor.openstack import models as openstack_models
+from nodeconductor_openstack import models as openstack_models
 from nodeconductor.structure import models as structure_models, SupportedServices
 from nodeconductor.template import models as template_models
 
