@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import sys
 from setuptools import setup, find_packages
 
 
@@ -6,11 +7,18 @@ dev_requires = [
     'Sphinx==1.2.2',
 ]
 
-install_requires = [
-    'nodeconductor>=0.76.0',
-    'sugarcrm>=0.1.1',
+tests_require = [
+    'factory_boy==2.4.1',
+    'django-celery==3.1.16',
+    'mock==1.0.1',
+    'mock-django==0.6.6',
+    'six>=1.9.0',
 ]
 
+install_requires = [
+    'nodeconductor_openstack>=0.2.0',
+    'sugarcrm>=0.1.1',
+]
 
 setup(
     name='nodeconductor-sugarcrm',
@@ -29,7 +37,7 @@ setup(
     },
     entry_points={
         'nodeconductor_extensions': (
-            'nodeconductor_sugarcrm = nodeconductor_sugarcrm.urls',
+            'nodeconductor_sugarcrm = nodeconductor_sugarcrm.extension:SugarCRMExtension',
         ),
     },
     # tests_require=tests_requires,
@@ -39,6 +47,6 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Operating System :: OS Independent',
-        'License :: Other/Proprietary License',
+        'License :: OSI Approved :: Apache Software License',
     ],
 )

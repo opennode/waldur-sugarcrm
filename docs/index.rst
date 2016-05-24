@@ -11,6 +11,7 @@ Guide
    :maxdepth: 1
 
    installation
+   events
 
 API
 ---
@@ -19,6 +20,14 @@ API
    :maxdepth: 1
 
    api
+
+Endpoints
+---------
+
+.. toctree::
+   :maxdepth: 1
+
+   drfapi/index
 
 License
 -------
