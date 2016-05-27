@@ -111,18 +111,17 @@ def wait_for_crm_template_group_provision(crm_uuid):
 def init_crm_api_url(crm_uuid):
     """ Init CRM API URL """
     crm = CRM.objects.get(uuid=crm_uuid)
-    options = crm.service_project_link.service.settings.options
+    settings = crm.service_project_link.service.settings
     backend = crm.get_backend()
     external_ips = backend.get_crm_instance_details(crm)['external_ips']
     if not external_ips:
         raise SugarCRMBackendError(
             'Cannot use OpenStack instance with name "%s" for CRM - it does not have external IP.' % crm.name)
     crm.api_url = '{protocol}://{external_ip}'.format(
-        protocol=options.get('protocol', backend.DEFAULT_PROTOCOL),
+        protocol=settings.get_option('protocol'),
         external_ip=external_ips[0])
     # we consider CRM as activated at this point
     crm.start_time = timezone.now()
-
     crm.save()
 
 
