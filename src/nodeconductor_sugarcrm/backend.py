@@ -42,6 +42,9 @@ class SugarCRMBaseBackend(ServiceBackend):
             force=force,
         )
 
+    def sync(self):
+        pass
+
 
 class SugarCRMBackend(SugarCRMBaseBackend):
     """ Sugar CRM backend methods
