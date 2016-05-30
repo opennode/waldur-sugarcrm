@@ -25,7 +25,6 @@ class SugarCRMBaseBackend(ServiceBackend):
 
     def __init__(self, settings, crm=None):
         self.settings = settings
-        self.options = settings.options or {}
         self.crm = crm
 
     def provision(self, crm, user_count):
@@ -52,10 +51,11 @@ class SugarCRMBackend(SugarCRMBaseBackend):
     2. SugarCRM client interacts with SugarCRM API.
     """
 
-    DEFAULT_USER_DATA = ("#cloud-config:\n"
-                         "runcmd:\n"
-                         "  - [ bootstrap, -p, {password}, -k, {license_code}, -v]")
-    DEFAULT_PROTOCOL = 'http'
+    DEFAULTS = {
+        'user_data': "#cloud-config:\nruncmd:\n  - [ bootstrap, -p, {password}, -k, {license_code}, -v]",
+        'protocol': "http",
+    }
+
     CRM_ADMIN_NAME = 'admin'
 
     class NodeConductorOpenStackClient(object):
@@ -197,10 +197,11 @@ class SugarCRMBackend(SugarCRMBaseBackend):
 
     def schedule_crm_instance_provision(self, crm):
         # prepare data for template group provisioning
-        user_data = self.options.get('user_data', self.DEFAULT_USER_DATA)
+        user_data = self.settings.get_option('user_data')
         admin_username = self.CRM_ADMIN_NAME
         admin_password = pwgen()
-        user_data = user_data.format(password=admin_password, license_code=self.options['license_code'])
+        user_data = user_data.format(
+            password=admin_password, license_code=self.settings.get_option('license_code'))
 
         template_data = [{
             'name': crm.name,
