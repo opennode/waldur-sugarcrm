@@ -7,7 +7,7 @@ from nodeconductor.core import serializers as core_serializers
 from nodeconductor.quotas import serializers as quotas_serializers
 from nodeconductor.structure import serializers as structure_serializers
 
-from . import models, backend
+from . import models
 
 
 class ServiceSerializer(structure_serializers.BaseServiceSerializer):
@@ -19,25 +19,19 @@ class ServiceSerializer(structure_serializers.BaseServiceSerializer):
         'password': 'NodeConductor user password (e.g. Password)',
     }
     SERVICE_ACCOUNT_EXTRA_FIELDS = {
-        'license_code': 'License code that will be used for SugarCRM activation. (required)',
-        'user_data': 'User data that will be passed to CRMs OpenStack instance on creation.'
-                     'Word {password} will be replaced with auto-generated admin password. '
-                     ' (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}]")',
-        'protocol': 'CRMs access protocol. (default: "http")',
+        'license_code': 'License code that will be used for SugarCRM activation',
+        'user_data': 'User data that will be passed to CRMs OpenStack instance on creation'
+                     'Word {password} will be replaced with auto-generated admin password',
+        'protocol': 'CRMs access protocol',
         'phone_regex': 'RegEx for phone validation',
-        'sms_email_from': 'Name of SMS email sender (SMS will not be send without this parameter).',
-        'sms_email_rcpt': 'Name of SMS email recipient (SMS will not be send without this parameter)',
+        'sms_email_from': 'Name of SMS email sender',
+        'sms_email_rcpt': 'Name of SMS email recipient',
     }
 
     class Meta(structure_serializers.BaseServiceSerializer.Meta):
         model = models.SugarCRMService
         view_name = 'sugarcrm-detail'
-
-    def get_fields(self):
-        fields = super(ServiceSerializer, self).get_fields()
-        fields['protocol'].initial = backend.SugarCRMBackend.DEFAULT_PROTOCOL
-        fields['user_data'].initial = backend.SugarCRMBackend.DEFAULT_USER_DATA
-        return fields
+        required_fields = 'license_code',
 
 
 class ServiceProjectLinkSerializer(structure_serializers.BaseServiceProjectLinkSerializer):
@@ -145,8 +139,8 @@ class CRMUserSerializer(core_serializers.AugmentedSerializerMixin, serializers.S
         crm = self.context['crm']
         phone = attrs.get('phone_mobile')
         if phone:
-            options = crm.service_project_link.service.settings.options or {}
-            phone_regex = options.get('phone_regex')
+            settings = crm.service_project_link.service.settings
+            phone_regex = settings.get_option('phone_regex')
             if phone_regex and not re.search(phone_regex, phone):
                 raise serializers.ValidationError({'phone': "Invalid phone number."})
 

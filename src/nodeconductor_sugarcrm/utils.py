@@ -7,9 +7,9 @@ logger = logging.getLogger(__name__)
 
 
 def sms_user_password(crm, phone, password):
-    options = crm.service_project_link.service.settings.options or {}
-    sender = options.get('sms_email_from')
-    recipient = options.get('sms_email_rcpt')
+    settings = crm.service_project_link.service.settings
+    sender = settings.get_option('sms_email_from')
+    recipient = settings.get_option('sms_email_rcpt')
 
     if sender and recipient and '{phone}' in recipient:
         send_mail(

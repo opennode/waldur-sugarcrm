@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 
 from ...models import CRM
-from nodeconductor.openstack import models as openstack_models
+from nodeconductor_openstack import models as openstack_models
 from nodeconductor.structure import models as structure_models, SupportedServices
 from nodeconductor.template import models as template_models
 
@@ -230,6 +230,7 @@ class Command(BaseCommand):
             resource_content_type=ContentType.objects.get_for_model(CRM),
             options={'service_settings': settings_url}
         )
+        template.tags.add('IaaS')
         self.created_instances.append(template)
         template_group_admin_url = self._get_admin_detail_url(template_group)
         self.stdout.write('  External template group with templates was created successfully, you can edit its details '
