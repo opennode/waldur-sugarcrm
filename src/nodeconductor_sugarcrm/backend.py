@@ -13,6 +13,8 @@ from nodeconductor.core.tasks import send_task
 from nodeconductor.core.utils import pwgen
 from nodeconductor.structure import ServiceBackend, ServiceBackendError
 
+from . import models
+
 
 logger = logging.getLogger(__name__)
 
@@ -347,3 +349,19 @@ class SugarCRMBackend(SugarCRMBaseBackend):
         """ Sync CRM quotas with backend """
         active_users = self.list_users(status=self.SugarCRMClient.UserStatuses.ACTIVE)
         self.crm.set_quota_usage(self.crm.Quotas.user_count, len(active_users))
+
+    def get_stats(self):
+        links = models.CRM.objects.filter(
+            service_project_link__service__settings=self.settings)
+        quota_values = models.CRM.get_sum_of_quotas_as_dict(links, quota_names=('user_count',))
+        stats = {
+            'user_count_quota': quota_values.get('user_count', -1.0),
+            'user_count_usage': quota_values.get('user_count_usage', 0.0)
+        }
+
+        try:
+            quota = self.settings.quotas.get(name='sugarcrm_user_count')
+            stats['user_count'] = quota.limit
+        except ObjectDoesNotExist:
+            stats['user_count'] = -1.0
+        return stats
