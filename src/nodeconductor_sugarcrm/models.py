@@ -7,8 +7,6 @@ from nodeconductor.quotas.fields import QuotaField, LimitAggregatorQuotaField, C
 from nodeconductor.quotas.models import QuotaModelMixin
 from nodeconductor.structure import models as structure_models
 
-from .backend import SugarCRMBackend
-
 
 class SugarCRMService(structure_models.Service):
     projects = models.ManyToManyField(
@@ -74,6 +72,7 @@ class CRM(QuotaModelMixin, structure_models.PublishableResource, structure_model
         return 'SugarCRM Instance %s' % self.name
 
     def get_backend(self):
+        from .backend import SugarCRMBackend
         return SugarCRMBackend(settings=self.service_project_link.service.settings, crm=self)
 
     def get_instance(self):
