@@ -1,3 +1,11 @@
+SugarCRM service settings
+--------------------------
+
+SugarCRM service settings have additional quotas:
+
+- sugarcrm_user_count - total count of user limits that were connected to SPLs.
+
+
 SugarCRM services list
 ----------------------
 
@@ -18,16 +26,18 @@ Request parameters:
 
 The following rules for generation of the service settings are used:
 
- - backend_url - URL of OpenStack service project link that will be used for sugarCRM resources creation
-                 (required, e.g.: http://example.com/api/openstack-service-project-link/1/);
+ - backend_url - URL of template group that describes OpenStack instance provision with default parameters
+                 (required, e.g.: http://example.com/api/template-groups/16c7675752244f5d9e870a2cb0cfeb02/);
  - username - NodeConductor user username (e.g. User);
  - password - NodeConductor user password (e.g. Password);
- - image_name - CRM OpenStack instance image name (default: "sugarcrm");
- - security_groups_names - List of CRMs OpenStack instance security groups names (default: ["http"]);
- - min_ram - minimum amount of ram for CRMs OpenStack instance (default: 2048 MB);
- - min_cores - storage volume size CRMs OpenStack instance. (default: 32768 MB);
- - system_size - storage volume size CRMs OpenStack instance (default: 32768 MB);
- - data_size - data volume size of CRMs OpenStack instance (default: 65536 MB);
+ - license_code - License code that will be used for SugarCRM activation (required);
+ - user_data - User data that will be passed to CRMs OpenStack instance on creation.
+               Word {password} will be replaced with auto-generated admin password
+               (default: "#cloud-config:\nruncmd:\n - [bootstrap, -p, {password}]");
+ - protocol - CRMs access protocol. (default: "http");
+ - phone_regex - RegEx for phone validation;
+ - sms_email_from - Name of SMS email sender (SMS will not be send without this parameter);
+ - sms_email_rcpt - Name of SMS email recipient (SMS will not be send without this parameter);
 
 
 Example of a request:
@@ -44,10 +54,10 @@ Example of a request:
     {
         "name": "My SugarCRM"
         "customer": "http://example.com/api/customers/2aadad6a4b764661add14dfdda26b373/",
-        "backend_url": "http://example.com/api/openstack-service-project-link/13",
+        "backend_url": "http://example.com/api/template-groups/16c7675752244f5d9e870a2cb0cfeb02/",
         "username": "User",
         "password": "Password",
-        "image": "SugarCRM-image"
+        "license_code": "some-code"
     }
 
 
@@ -81,18 +91,23 @@ To get a list of connections between a project and an oracle service, run GET ag
 where a user has a role.
 
 
+Service-project-link quotas
+---------------------------
+
+ - user_limit_count - limitation for total number of users in all CRMs.
+ - crm_count - CRMs count.
+
+
 Create a new SugarCRM resource
 ------------------------------
-CRM - SugarCRM resource. A new CRM can be created by users with project administrator role, customer owner role or with
+A new SugarCRM instance can be created by users with project administrator role, customer owner role or with
 staff privilege (is_staff=True). To create a CRM, client must issue POST request to **/api/sugarcrm-crms/** with
 parameters:
 
  - name - CRM name;
  - description - CRM description (optional);
  - link to the service-project-link object;
- - api_url - sugarCRM API URL (temporary, will be populated from CRM instance properties in future);
- - admin_username - username of auto-created sugarCRM admin;
- - admin_password - password of auto-created sugarCRM admin;
+ - user_count - maximal number of users in CRM (default: 10);
 
 
  Example of a valid request:
@@ -109,16 +124,25 @@ parameters:
         "name": "test CRM",
         "description": "sample description",
         "service_project_link": "http://example.com/api/sugarcrm-service-project-link/1/",
-        "api_url": "http://example.com",
-        "admin_username": "admin",
-        "admin_password": "admin"
+        "size": 1024,
+        "user_count": 20
     }
 
+Updating a SugarCRM resource
+----------------------------
 
-CRM display
------------
+SugarCRM can be update by issuing PUT request against **/api/sugarcrm-crms/<crm_uuid>/**.
 
-To get CRM data - issue GET request against **/api/sugarcrm-crms/<crm_uuid>/**.
+Supported fields for update are **name** and **description**. Quota management for users is performed
+through **/api/quotas/** endpoint by POSTing a new limit for the **user_count** quota with scope
+of the SugarCRM instance.
+
+
+SugarCRM resource display
+-------------------------
+
+To get SugarCRM resource data issue GET request against **/api/sugarcrm-crms/<crm_uuid>/**.
+Field "instance_url" is visible only for staff.
 
 Example rendering of the CRM object:
 
@@ -128,29 +152,37 @@ Example rendering of the CRM object:
         {
             "url": "http://example.com/api/sugarcrm-crms/7693d9308e0641baa95720d0046e5696/",
             "uuid": "7693d9308e0641baa95720d0046e5696",
-            "name": "pavel-test-sugarcrm-11",
+            "name": "test-sugarcrm",
             "description": "",
-            "start_time": null,
+            "start_time": "2015-10-19T08:06:15Z",
             "service": "http://example.com/api/sugarcrm/655b79490b63442d9264d76ab9478f62/",
-            "service_name": "local sugarcrm service",
+            "service_name": "sugarcrm service",
             "service_uuid": "655b79490b63442d9264d76ab9478f62",
             "project": "http://example.com/api/projects/0e86f04bb1fd48e181742d0598db69d5/",
-            "project_name": "local sugarcrm project",
+            "project_name": "sugarcrm project",
             "project_uuid": "0e86f04bb1fd48e181742d0598db69d5",
             "customer": "http://example.com/api/customers/3b0fc2c0f0ed4f40b26126dc9cbd8f9f/",
-            "customer_name": "local sugarcrm customer",
+            "customer_name": "sugarcrm customer",
             "customer_native_name": "",
             "customer_abbreviation": "",
             "project_groups": [],
             "resource_type": "SugarCRM.CRM",
             "state": "Provisioning",
             "created": "2015-10-20T10:35:19.146Z",
+            "instance_url": "http://example.com/api/openstack-instances/42c35f288c524d52b86d945adde91db2/",
             "api_url": "http://example.com",
-            "admin_username": "admin",
-            "admin_password": "admin"
+            "publishing_state": "not published",
+            "quotas": [
+                {
+                    "url": "http://example.com/api/quotas/224c771110cc4340aa6a18f58861b307/",
+                    "uuid": "224c771110cc4340aa6a18f58861b307",
+                    "name": "user_count",
+                    "limit": 10.0,
+                    "usage": 0.0,
+                }
+            ]
         }
     ]
-
 
 Delete CRM
 ----------
@@ -164,22 +196,28 @@ List CRM users
 To get list of all registered on CRM users - issue GET request against **/api/sugarcrm-crms/<crm_uuid>/users/**.
 Only users with view access to CRM can view CRM users.
 
+Supported filters:
+
+ - ?user_name
+ - ?first_name
+ - ?last_name
+ - ?status - the status can be Active, Inactive or Reserved.
+
 Response example:
 
 .. code-block:: javascript
 
-[
-    {
-        "url": "http://example.com/api/sugarcrm-crms/24156c367e3a41eea81e374073fa1060/users/a67a5b55-bb5f-1259-60a2-562e3c88fb34/",
-        "id": "a67a5b55-bb5f-1259-60a2-562e3c88fb34",
-        "user_name": "admin",
-        "status": "Active",
-        "is_admin": true,
-        "last_name": "Administrator",
-        "first_name": "",
-        "email": "admin@example.com"
-    }
-]
+    [
+        {
+            "url": "http://example.com/api/sugarcrm-crms/24156c367e3a41eea81e374073fa1060/users/a67a5b55-bb5f-1259-60a2-562e3c88fb34/",
+            "uuid": "a67a5b55-bb5f-1259-60a2-562e3c88fb34",
+            "user_name": "user",
+            "status": "Active",
+            "last_name": "User",
+            "first_name": "",
+            "email": "user@example.com"
+        }
+    ]
 
 
 Create new CRM user
@@ -190,11 +228,11 @@ To create new CRM user - issue POST request against **/api/sugarcrm-crms/<crm_uu
 Request parameters:
 
  - user_name - new user username;
- - password - new user password;
  - last_name - new user last name;
  - first_name - new user first name (can be empty);
- - is_admin - is new user CRM administrator (boolean, default: false);
  - email - new user email (can be empty);
+ - phone - new user mobile phone number (can be empty);
+ - status - new user status (can be empty);
 
 
 Example of a request:
@@ -209,14 +247,62 @@ Example of a request:
     Host: example.com
 
     {
-        "user_name": "test_user
-        "password": "test_user",
-        "last_name": "test user last name",
-        "is_admin": "false"
+        "user_name": "test_user",
+        "last_name": "test user last name"
     }
 
 
-Delete CRM user
----------------
+Update a CRM user
+-----------------
+
+To update CRM user - issue PATCH request against **/api/sugarcrm-crms/<crm_uuid>/users/<user_id>/**.
+
+
+Example of a request:
+
+
+.. code-block:: http
+
+    PUT /api/sugarcrm/24156c367e3a41eea81e374073fa1060/users/cc420109-a419-3d5b-558b-567168cf750f/ HTTP/1.1
+    Content-Type: application/json
+    Accept: application/json
+    Authorization: Token c84d653b9ec92c6cbac41c706593e66f567a7fa4
+    Host: example.com
+
+    {
+        "email": "test_user@example.com",
+    }
+
+
+Delete a CRM user
+-----------------
 
 To delete CRM user - issue DELETE request against **/api/sugarcrm-crms/<crm_uuid>/users/<user_id>/**.
+
+
+Reset user password
+-------------------
+
+To reset user password - issue POST request against **/api/sugarcrm-crms/<crm_uuid>/users/<user_id>/password/**.
+You can specify `notify` parameter in order to send user notification about newly created password.
+
+
+Example of a valid request:
+
+.. code-block:: http
+
+    POST /api/sugarcrm-crms/db82a52368ba4957ac2cdb6a37d22dee/users/cc420109-a419-3d5b-558b-5671/password/ HTTP/1.1
+    Content-Type: application/json
+    Accept: application/json
+    Authorization: Token c84d653b9ec92c6cbac41c706593e66f567a7fa4
+    Host: example.com
+
+    {
+        "notify": "true"
+    }
+
+Example of response:
+
+    {
+        "password": "uONLv0UjcI"
+    }
