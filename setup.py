@@ -17,7 +17,7 @@ tests_require = [
 
 install_requires = [
     'nodeconductor>0.102.2',
-    'nodeconductor_openstack>=0.3.0',
+    'nodeconductor_openstack>=0.4.1',
     'sugarcrm>=0.1.1',
 ]
 

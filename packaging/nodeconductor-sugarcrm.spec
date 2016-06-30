@@ -8,6 +8,7 @@ Url: http://nodeconductor.com
 Source0: %{name}-%{version}.tar.gz
 
 Requires: nodeconductor > 0.102.2
+Requires: nodeconductor-openstack >= 0.4.1
 Requires: python-sugarcrm >= 0.1.1
 
 BuildArch: noarch
