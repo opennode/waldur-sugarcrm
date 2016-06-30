@@ -16,14 +16,14 @@ tests_require = [
 ]
 
 install_requires = [
-    'nodeconductor>=0.101.2',
-    'nodeconductor_openstack>=0.3.0',
+    'nodeconductor>0.102.2',
+    'nodeconductor_openstack>=0.4.1',
     'sugarcrm>=0.1.1',
 ]
 
 setup(
     name='nodeconductor-sugarcrm',
-    version='0.2.0',
+    version='0.2.1',
     author='OpenNode Team',
     author_email='info@opennodecloud.com',
     url='http://nodeconductor.com',
