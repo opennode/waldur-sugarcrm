@@ -23,7 +23,7 @@ install_requires = [
 
 setup(
     name='nodeconductor-sugarcrm',
-    version='0.2.0',
+    version='0.2.1',
     author='OpenNode Team',
     author_email='info@opennodecloud.com',
     url='http://nodeconductor.com',
