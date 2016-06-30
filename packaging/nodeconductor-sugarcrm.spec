@@ -1,7 +1,7 @@
 Name: nodeconductor-sugarcrm
 Summary: SugarCRM plugin for NodeConductor
 Group: Development/Libraries
-Version: 0.2.0
+Version: 0.2.1
 Release: 1.el7
 License: Copyright 2015 OpenNode LLC.  All rights reserved.
 Url: http://nodeconductor.com
@@ -36,6 +36,9 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 
 %changelog
+* Thu Jun 30 2016 Jenkins <jenkins@opennodecloud.com> - 0.2.1-1.el7
+- New upstream release
+
 * Thu Jun 16 2016 Jenkins <jenkins@opennodecloud.com> - 0.2.0-1.el7
 - New upstream release
 
