@@ -78,3 +78,14 @@ class CRM(QuotaModelMixin, structure_models.PublishableResource, structure_model
     def get_instance(self):
         """ Restore instance from URL """
         return core_utils.instance_from_url(self.instance_url)
+
+    def as_dict(self):
+        """ Represent instance as dict with all necessary attributes """
+        return {
+            'name': self.name,
+            'description': self.description,
+            'service_project_link': self.service_project_link.pk,
+            'admin_username': self.admin_username,
+            'admin_password': self.admin_password,
+            'tags': [tag.name for tag in self.tags.all()],
+        }
