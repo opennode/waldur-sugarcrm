@@ -3,11 +3,10 @@ from __future__ import unicode_literals
 from django.db import models
 
 from nodeconductor.core import utils as core_utils
+from nodeconductor.cost_tracking.models import PayableMixin
 from nodeconductor.quotas.fields import QuotaField, LimitAggregatorQuotaField, CounterQuotaField
 from nodeconductor.quotas.models import QuotaModelMixin
 from nodeconductor.structure import models as structure_models
-
-from .backend import SugarCRMBackend
 
 
 class SugarCRMService(structure_models.Service):
@@ -48,7 +47,8 @@ class SugarCRMServiceProjectLink(structure_models.ServiceProjectLink):
         return 'sugarcrm-spl'
 
 
-class CRM(QuotaModelMixin, structure_models.PublishableResource, structure_models.PaidResource):
+class CRM(QuotaModelMixin, structure_models.PublishableResource, structure_models.ApplicationMixin,
+          PayableMixin):
     service_project_link = models.ForeignKey(
         SugarCRMServiceProjectLink, related_name='crms', on_delete=models.PROTECT)
 
@@ -73,6 +73,7 @@ class CRM(QuotaModelMixin, structure_models.PublishableResource, structure_model
         return 'SugarCRM Instance %s' % self.name
 
     def get_backend(self):
+        from .backend import SugarCRMBackend
         return SugarCRMBackend(settings=self.service_project_link.service.settings, crm=self)
 
     def get_instance(self):
