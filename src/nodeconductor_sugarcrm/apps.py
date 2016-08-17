@@ -10,7 +10,6 @@ class SugarCRMConfig(AppConfig):
         from nodeconductor.cost_tracking import CostTrackingRegister
         from nodeconductor.quotas.fields import LimitAggregatorQuotaField
         from nodeconductor.structure import SupportedServices
-        from nodeconductor.template import TemplateRegistry
 
         # structure
         from .backend import SugarCRMBackend
@@ -19,10 +18,6 @@ class SugarCRMConfig(AppConfig):
         # cost tracking
         from .cost_tracking import SugarCRMCostTrackingBackend
         CostTrackingRegister.register(self.label, SugarCRMCostTrackingBackend)
-
-        # template
-        from .template import CRMProvisionTemplateForm
-        TemplateRegistry.register(CRMProvisionTemplateForm)
 
         from nodeconductor.structure.models import ServiceSettings
         from . import handlers, signals as sugarcrm_signals
