@@ -1,33 +1,33 @@
-from django.contrib.contenttypes.models import ContentType
+from nodeconductor.cost_tracking import CostTrackingStrategy, CostTrackingRegister, ConsumableItem
 
-from nodeconductor.cost_tracking import CostTrackingBackend
-from nodeconductor.cost_tracking.models import DefaultPriceListItem
-
-from .models import CRM
+from . import models
 
 
-USERS = 'users'
-USERS_KEY = 'count'
-SUPPORT = 'support'
-SUPPORT_KEY = 'premium'
+class CRMStrategy(CostTrackingStrategy):
+    resource_class = models.CRM
 
+    class Types(object):
+        SUPPORT = 'support'
+        USERS = 'users'
 
-class SugarCRMCostTrackingBackend(CostTrackingBackend):
-    NUMERICAL = [USERS]
-
-    @classmethod
-    def get_default_price_list_items(cls):
-        content_type = ContentType.objects.get_for_model(CRM)
-
-        yield DefaultPriceListItem(
-            item_type=USERS, key=USERS_KEY,
-            resource_content_type=content_type)
-
-        yield DefaultPriceListItem(
-            item_type=SUPPORT, key=SUPPORT_KEY,
-            resource_content_type=content_type)
+    class Keys(object):
+        SUPPORT = 'premium'
+        USERS = 'count'
 
     @classmethod
-    def get_used_items(cls, resource):
-        user_count = resource.quotas.get(name=resource.Quotas.user_count).limit
-        return [(USERS, USERS_KEY, user_count)]
+    def get_consumable_items(cls):
+        return [
+            ConsumableItem(item_type=cls.Types.USERS, key=cls.Keys.USERS, name='Users count'),
+            ConsumableItem(item_type=cls.Types.SUPPORT, key=cls.Keys.SUPPORT, name='Support: premium'),
+        ]
+
+    @classmethod
+    def get_configuration(cls, crm):
+        user_count = crm.quotas.get(name=crm.Quotas.user_count).limit
+        return {
+            ConsumableItem(item_type=cls.Types.USERS, key=cls.Keys.USERS): user_count,
+            ConsumableItem(item_type=cls.Types.SUPPORT, key=cls.Keys.SUPPORT): 1,
+        }
+
+
+CostTrackingRegister.register_strategy(CRMStrategy)

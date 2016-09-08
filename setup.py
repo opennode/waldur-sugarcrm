@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import sys
 from setuptools import setup, find_packages
 
 
@@ -16,7 +15,7 @@ tests_require = [
 ]
 
 install_requires = [
-    'nodeconductor>0.102.2',
+    'nodeconductor>0.105.0',
     'nodeconductor_openstack>=0.4.1',
     'sugarcrm>=0.1.1',
 ]
