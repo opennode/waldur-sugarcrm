@@ -7,17 +7,12 @@ class SugarCRMConfig(AppConfig):
     service_name = 'SugarCRM'
 
     def ready(self):
-        from nodeconductor.cost_tracking import CostTrackingRegister
         from nodeconductor.quotas.fields import LimitAggregatorQuotaField
         from nodeconductor.structure import SupportedServices
 
         # structure
         from .backend import SugarCRMBackend
         SupportedServices.register_backend(SugarCRMBackend)
-
-        # cost tracking
-        from .cost_tracking import SugarCRMCostTrackingBackend
-        CostTrackingRegister.register(self.label, SugarCRMCostTrackingBackend)
 
         from nodeconductor.structure.models import ServiceSettings
         from . import handlers, signals as sugarcrm_signals
