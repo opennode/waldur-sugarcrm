@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import sys
 from setuptools import setup, find_packages
 
 
@@ -16,14 +15,14 @@ tests_require = [
 ]
 
 install_requires = [
-    'nodeconductor>0.102.2',
+    'nodeconductor>=0.107.0',
     'nodeconductor_openstack>=0.4.1',
     'sugarcrm>=0.1.1',
 ]
 
 setup(
     name='nodeconductor-sugarcrm',
-    version='0.3.0',
+    version='0.4.0',
     author='OpenNode Team',
     author_email='info@opennodecloud.com',
     url='http://nodeconductor.com',
@@ -48,6 +47,6 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Operating System :: OS Independent',
-        'License :: OSI Approved :: Apache Software License',
+        'License :: OSI Approved :: MIT License',
     ],
 )
