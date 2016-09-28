@@ -1,13 +1,13 @@
 Name: nodeconductor-sugarcrm
 Summary: SugarCRM plugin for NodeConductor
 Group: Development/Libraries
-Version: 0.4.0
+Version: 0.5.0
 Release: 1.el7
 License: MIT
 Url: http://nodeconductor.com
 Source0: %{name}-%{version}.tar.gz
 
-Requires: nodeconductor > 0.102.2
+Requires: nodeconductor > 0.108.0
 Requires: nodeconductor-openstack >= 0.4.1
 Requires: python-sugarcrm >= 0.1.1
 
@@ -36,6 +36,9 @@ rm -rf %{buildroot}
 %defattr(-,root,root)
 
 %changelog
+* Wed Sep 28 2016 Jenkins <jenkins@opennodecloud.com> - 0.5.0-1.el7
+- New upstream release
+
 * Thu Sep 15 2016 Jenkins <jenkins@opennodecloud.com> - 0.4.0-1.el7
 - New upstream release
 
